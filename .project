@@ -3,6 +3,7 @@
 	<name>ofxGrafica</name>
 	<comment></comment>
 	<projects>
+		<project>openFrameworks</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -24,4 +25,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>addons</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
