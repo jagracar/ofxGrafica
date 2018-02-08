@@ -1,18 +1,28 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGConstants.h"
 #include "ofxGAxisLabel.h"
 
 class ofxGAxis {
 public:
-	ofxGAxis();
 
-	static const int X_AXIS = 0;
-	static const int Y_AXIS = 1;
-	static const int TOP_AXIS = 2;
-	static const int RIGHT_AXIS = 3;
+	ofxGAxis() = default;
+	ofxGAxis(int _type, array<float,2> _dim, array<float,2> _lim, bool _log);
+	void draw();
 
 protected:
+
+	void updateTicks();
+	void obtainLogarithmicTicks();
+	void obtainLinearTicks();
+	void updatePlotTicks();
+	void updateTicksInside();
+	void updateTickLabels();
+	void drawAsXAxis();
+	void drawAsYAxis();
+	void drawAsTopAxis();
+	void drawAsRightAxis();
 
 	// General properties
 	int type;

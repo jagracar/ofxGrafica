@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ofxGConstants.h"
 #include "ofxGAxis.h"
 #include "ofxGAxisLabel.h"
 #include "ofxGHistogram.h"
