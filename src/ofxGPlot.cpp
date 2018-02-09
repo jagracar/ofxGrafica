@@ -1,4 +1,5 @@
 #include "ofxGPlot.h"
+#include "ofMain.h"
 
 const string ofxGPlot::MAINLAYERID = "main layer";
 
@@ -7,8 +8,8 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) {
 	outerDim = {plotWidth, plotHeight};
 	mar = {60, 70, 40, 30};
 	dim = {outerDim[0] - mar[1] - mar[3], outerDim[1] - mar[0] - mar[2]};
-	xLim = {0, 1};
-	yLim = {0, 1};
+	xLim = {0, 100};
+	yLim = {0, 100};
 	fixedXLim = false;
 	fixedYLim = false;
 	xLog = false;
@@ -27,15 +28,11 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) {
 
 	mainLayer = ofxGLayer(MAINLAYERID, dim, xLim, yLim, xLog, yLog);
 
-	xAxis = ofxGAxis();
-	topAxis = ofxGAxis();
-	yAxis = ofxGAxis();
-	rightAxis = ofxGAxis();
+	xAxis = ofxGAxis(GRAFICA_X_AXIS, dim, xLim, xLog);
+	topAxis = ofxGAxis(GRAFICA_TOP_AXIS, dim, xLim, xLog);
+	yAxis = ofxGAxis(GRAFICA_Y_AXIS, dim, yLim, yLog);
+	rightAxis = ofxGAxis(GRAFICA_RIGHT_AXIS, dim, yLim, yLog);
 	title = ofxGTitle();
-	//xAxis = ofxGAxis(ofxGAxis::X_AXIS, dim, xLim, xLog);
-	//topAxis = ofxGAxis(ofxGAxis::TOP_AXIS, dim, xLim, xLog);
-	//yAxis = ofxGAxis(ofxGAxis::Y_AXIS, dim, yLim, yLog);
-	//rightAxis = ofxGAxis(ofxGAxis::RIGHT_AXIS, dim, yLim, yLog);
 	//title = ofxGTitle(dim);
 }
 
@@ -106,8 +103,10 @@ void ofxGPlot::defaultDraw() {
 	beginDraw();
 	drawBackground();
 	drawBox();
-	//drawXAxis();
-	//drawYAxis();
+	drawXAxis();
+	drawYAxis();
+	drawTopAxis();
+	drawRightAxis();
 	//drawTitle();
 	//drawLines();
 	//drawPoints();
@@ -146,3 +145,20 @@ void ofxGPlot::drawBox() {
 	ofDrawRectangle(0, -dim[1], dim[0], dim[1]);
 	ofPopStyle();
 }
+
+void ofxGPlot::drawXAxis() {
+	xAxis.draw();
+}
+
+void ofxGPlot::drawYAxis() {
+	yAxis.draw();
+}
+
+void ofxGPlot::drawTopAxis() {
+	topAxis.draw();
+}
+
+void ofxGPlot::drawRightAxis() {
+	rightAxis.draw();
+}
+

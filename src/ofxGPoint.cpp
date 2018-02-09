@@ -1,7 +1,8 @@
 #include "ofxGPoint.h"
+#include "ofMain.h"
 
 ofxGPoint::ofxGPoint() :
-		x(0.0), y(0.0), label(""), valid(true) {
+		x(0), y(0), label(""), valid(true) {
 }
 
 ofxGPoint::ofxGPoint(float _x, float _y, const string &_label) :
@@ -26,6 +27,7 @@ void ofxGPoint::set(float newX, float newY, const string &newLabel) {
 void ofxGPoint::set(const ofVec2f &v, const string &newLabel) {
 	set(v.x, v.y, newLabel);
 }
+
 void ofxGPoint::set(const ofxGPoint &p) {
 	set(p.x, p.y, p.label);
 }
@@ -51,6 +53,7 @@ void ofxGPoint::setXY(const ofVec2f &v) {
 	y = v.y;
 	valid = isfinite(x) && isfinite(y);
 }
+
 void ofxGPoint::setLabel(const string &newLabel) {
 	label = newLabel;
 }

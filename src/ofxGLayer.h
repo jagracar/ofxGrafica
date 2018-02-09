@@ -1,29 +1,34 @@
 #pragma once
 
-#include "ofMain.h"
 #include "ofxGPoint.h"
 #include "ofxGHistogram.h"
+#include "ofMain.h"
 
 class ofxGLayer {
 public:
-	ofxGLayer() = default;
-	ofxGLayer(const string &_id, const array<float, 2> &_dim,
-			const array<float, 2> &_xLim, const array<float, 2> &_yLim,
-			bool _xLog, bool _yLog);
+	// Constructor
+	ofxGLayer(const string &_id = "defaultId", const array<float, 2> &_dim = {
+			0, 1 }, const array<float, 2> &_xLim = { 0, 1 },
+			const array<float, 2> &_yLim = { 0, 1 }, bool _xLog = false,
+			bool _yLog = false);
 
-	bool isId(const string &someId);
-	float valueToXPlot(float x);
-	float valueToYPlot(float y);
-	array<float, 2> valueToPlot(float x, float y);
-	ofxGPoint valueToPlot(ofxGPoint point);
-	array<float, 2> plotToValue(float xPlot, float yPlot);
-	bool isInside(float xPlot, float yPlot);
-	bool isInside(ofxGPoint plotPoint);
-	ofxGPoint getPointAtPlotPos(float xPlot, float yPlot);
+	// Drawing methods
+
+	// Setter methods
+
+	bool isId(const string &someId) const;
+	float valueToXPlot(float x) const;
+	float valueToYPlot(float y) const;
+	array<float, 2> valueToPlot(float x, float y) const;
+	ofxGPoint valueToPlot(ofxGPoint point) const;
+	array<float, 2> plotToValue(float xPlot, float yPlot) const;
+	bool isInside(float xPlot, float yPlot) const;
+	bool isInside(ofxGPoint plotPoint) const;
+	ofxGPoint getPointAtPlotPos(float xPlot, float yPlot) const;
 
 protected:
-	float xPlotToValue(float xPlot);
-	float yPlotToValue(float yPlot);
+	float xPlotToValue(float xPlot) const;
+	float yPlotToValue(float yPlot) const;
 
 	// General properties
 	string id;

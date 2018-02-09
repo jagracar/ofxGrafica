@@ -7,5 +7,4 @@
 #include "ofxGLayer.h"
 #include "ofxGPlot.h"
 #include "ofxGPoint.h"
-#include "ofxGPointsArray.h"
 #include "ofxGTitle.h"

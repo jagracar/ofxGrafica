@@ -1,12 +1,9 @@
 #pragma once
 
-namespace grafica {
+enum ofxGAxisType {
+	GRAFICA_X_AXIS, GRAFICA_Y_AXIS, GRAFICA_TOP_AXIS, GRAFICA_RIGHT_AXIS
+};
 
-const int GRAFICA_X = 0;
-const int GRAFICA_Y = 1;
-const int GRAFICA_TOP = 2;
-const int GRAFICA_RIGHT = 3;
-
-const int GRAFICA_CENTER = 4;
-
-}
+enum ofxGTextAlignment {
+	GRAFICA_CENTER_ALIGN, GRAFICA_LEFT_ALIGN, GRAFICA_RIGHT_ALIGN
+};
