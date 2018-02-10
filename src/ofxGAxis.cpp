@@ -38,7 +38,7 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2> &_dim,
 	// Font properties
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
-	fontSize = 11;
+	fontSize = 9;
 	font.load(fontName, fontSize);
 
 	// Update the tick containers
@@ -245,7 +245,7 @@ void ofxGAxis::draw() const {
 	}
 
 	if (drawAxisLabel) {
-		//lab.draw();
+		lab.draw();
 	}
 }
 
@@ -283,7 +283,7 @@ void ofxGAxis::drawAsXAxis() const {
 					ofPushMatrix();
 					ofTranslate(plotTicks[i] + bounds.height / 2,
 							offset + tickLabelOffset + bounds.width);
-					ofRotate(-90);
+					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -338,7 +338,7 @@ void ofxGAxis::drawAsYAxis() const {
 					ofPushMatrix();
 					ofTranslate(-offset - tickLabelOffset,
 							plotTicks[i] + bounds.width / 2);
-					ofRotate(-90);
+					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -396,7 +396,7 @@ void ofxGAxis::drawAsTopAxis() const {
 					ofPushMatrix();
 					ofTranslate(plotTicks[i] + bounds.height / 2,
 							-offset - tickLabelOffset);
-					ofRotate(-90);
+					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -455,7 +455,7 @@ void ofxGAxis::drawAsRightAxis() const {
 					ofPushMatrix();
 					ofTranslate(offset + tickLabelOffset + bounds.height,
 							plotTicks[i] + bounds.width / 2);
-					ofRotate(-90);
+					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}

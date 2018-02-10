@@ -21,9 +21,9 @@ public:
 	void setText(const string &newText);
 	void setTextAlignment(ofxGTextAlignment newTextAlignment);
 	void setFontName(const string &newFontName);
-	void setFontColor(ofColor newFontColor);
+	void setFontColor(const ofColor &newFontColor);
 	void setFontSize(int newFontSize);
-	void setFontProperties(const string &newFontName, ofColor newFontColor,
+	void setFontProperties(const string &newFontName, const ofColor &newFontColor,
 			int newFontSize);
 
 protected:
