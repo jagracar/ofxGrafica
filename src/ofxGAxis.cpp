@@ -3,13 +3,11 @@
 #include "ofxGAxisLabel.h"
 #include "ofMain.h"
 
-ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2> &_dim,
-		const array<float, 2> &_lim, bool _log) :
+ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<float, 2>& _lim, bool _log) :
 		type(_type), dim(_dim), lim(_lim), log(_log) {
 	// Do some sanity checks
 	if (log && (lim[0] <= 0 || lim[1] <= 0)) {
-		throw invalid_argument(
-				"The axis limits are negative and this is not allowed in logarithmic scale.");
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
 	// Format properties
@@ -20,15 +18,13 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2> &_dim,
 	// Ticks properties
 	nTicks = 5;
 	ticksSeparation = -1;
+	ticksPrecission = 0;
 	fixedTicks = false;
 	tickLength = 3;
 	smallTickLength = 2;
 	expTickLabels = false;
-	rotateTickLabels =
-			(type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ?
-					false : false;
-	drawTickLabels =
-			(type == GRAFICA_X_AXIS || type == GRAFICA_Y_AXIS) ? true : true;
+	rotateTickLabels = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? false : true;
+	drawTickLabels = (type == GRAFICA_X_AXIS || type == GRAFICA_Y_AXIS) ? true : false;
 	tickLabelOffset = 7;
 
 	// Label properties
@@ -53,14 +49,7 @@ int ofxGAxis::obtainSigDigits(float number) {
 }
 
 float ofxGAxis::roundPlus(float number, int sigDigits) {
-	float roundedNumber = round(number * pow(10, sigDigits))
-			/ pow(10, sigDigits);
-
-	if (sigDigits <= 0) {
-		roundedNumber = round(roundedNumber);
-	}
-
-	return roundedNumber;
+	return round(number * pow(10, sigDigits)) / pow(10, sigDigits);
 }
 
 void ofxGAxis::updateTicks() {
@@ -73,77 +62,72 @@ void ofxGAxis::updateTicks() {
 
 void ofxGAxis::obtainLogarithmicTicks() {
 	// Get the exponents of the first and last ticks in increasing order
-	int firstExp =
-			(lim[1] > lim[0]) ? floor(log10(lim[0])) : floor(log10(lim[1]));
+	int firstExp = (lim[1] > lim[0]) ? floor(log10(lim[0])) : floor(log10(lim[1]));
 	int lastExp = (lim[1] > lim[0]) ? ceil(log10(lim[1])) : ceil(log10(lim[0]));
 
 	// Fill the ticks container
 	ticks.clear();
 
 	for (int exp = firstExp; exp < lastExp; ++exp) {
-		float base = roundPlus(pow(10, exp), -exp);
+		float base = pow(10, exp);
 
-		ticks.push_back(base);
-
-		for (int i = 2; i <= 9; ++i) {
+		for (int i = 1; i <= 9; ++i) {
 			ticks.push_back(i * base);
 		}
 	}
 
-	ticks.push_back(roundPlus(pow(10, lastExp), -lastExp));
+	ticks.push_back(pow(10, lastExp));
 }
 
 void ofxGAxis::obtainLinearTicks() {
 	// Obtain the required precision for the ticks
 	float step = 0;
-	int sigDigits = 0;
 	int nSteps = 0;
 
 	if (ticksSeparation > 0) {
 		step = (lim[1] > lim[0]) ? ticksSeparation : -ticksSeparation;
-		sigDigits = obtainSigDigits(step);
+		ticksPrecission = obtainSigDigits(step);
 
-		while (roundPlus(step, sigDigits) - step != 0) {
-			++sigDigits;
+		while (abs(roundPlus(step, ticksPrecission) - step) > abs(0.001 * step)) {
+			++ticksPrecission;
 		}
 
 		nSteps = floor((lim[1] - lim[0]) / step);
 	} else if (nTicks > 0) {
 		step = (lim[1] - lim[0]) / nTicks;
-		sigDigits = obtainSigDigits(step);
-		step = roundPlus(step, sigDigits);
+		ticksPrecission = obtainSigDigits(step);
+		step = roundPlus(step, ticksPrecission);
 
 		if (step == 0 || abs(step) > abs(lim[1] - lim[0])) {
-			sigDigits++;
-			step = roundPlus((lim[1] - lim[0]) / nTicks, sigDigits);
+			ticksPrecission++;
+			step = roundPlus((lim[1] - lim[0]) / nTicks, ticksPrecission);
 		}
 
 		nSteps = floor((lim[1] - lim[0]) / step);
 	}
 
 	// Calculate the linear ticks
+	ticks.clear();
+
 	if (nSteps > 0) {
 		// Obtain the first tick
 		float firstTick = lim[0] + ((lim[1] - lim[0]) - nSteps * step) / 2;
 
 		// Subtract some steps to be sure we have all
-		firstTick = roundPlus(firstTick - 2 * step, sigDigits);
+		firstTick = roundPlus(firstTick - 2 * step, ticksPrecission);
 
 		while ((lim[1] - firstTick) * (lim[0] - firstTick) > 0) {
-			firstTick = roundPlus(firstTick + step, sigDigits);
+			firstTick = roundPlus(firstTick + step, ticksPrecission);
 		}
 
 		// Calculate the rest of the ticks
 		int n = floor(abs((lim[1] - firstTick) / step)) + 1;
 
-		ticks.clear();
 		ticks.push_back(firstTick);
 
 		for (int i = 1; i < n; ++i) {
-			ticks.push_back(roundPlus(ticks[i - 1] + step, sigDigits));
+			ticks.push_back(roundPlus(ticks.back() + step, ticksPrecission));
 		}
-	} else {
-		ticks.clear();
 	}
 }
 
@@ -189,6 +173,7 @@ void ofxGAxis::updateTicksInside() {
 }
 
 void ofxGAxis::updateTickLabels() {
+	stringstream ss;
 	tickLabels.clear();
 
 	if (log) {
@@ -201,15 +186,12 @@ void ofxGAxis::updateTickLabels() {
 					logValue = round(logValue);
 
 					if (expTickLabels) {
-						tickLabels.push_back("1e" + (int) logValue);
+						tickLabels.push_back("1e" + to_string((int) logValue));
 					} else {
 						if (logValue > -3.1 && logValue < 3.1) {
-							tickLabels.push_back(
-									(logValue >= 0) ?
-											to_string((int) tick) :
-											to_string(tick));
+							tickLabels.push_back((logValue >= 0) ? to_string((int) tick) : to_string(tick));
 						} else {
-							tickLabels.push_back("1e" + (int) logValue);
+							tickLabels.push_back("1e" + to_string((int) logValue));
 						}
 					}
 				} else {
@@ -221,9 +203,9 @@ void ofxGAxis::updateTickLabels() {
 		}
 	} else {
 		for (float tick : ticks) {
-			tickLabels.push_back(
-					(fmod(tick, 1) == 0 && abs(tick) < 1e9) ?
-							to_string((int) tick) : to_string(tick));
+			ss.str("");
+			ss << std::fixed << std::setprecision(ticksPrecission) << tick;
+			tickLabels.push_back((fmod(tick, 1) == 0 && abs(tick) < 1e9) ? to_string((int) tick) : ss.str());
 		}
 	}
 }
@@ -261,11 +243,9 @@ void ofxGAxis::drawAsXAxis() const {
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
 			if (log && tickLabels[i] == "") {
-				ofDrawLine(plotTicks[i], offset, plotTicks[i],
-						offset + smallTickLength);
+				ofDrawLine(plotTicks[i], offset, plotTicks[i], offset + smallTickLength);
 			} else {
-				ofDrawLine(plotTicks[i], offset, plotTicks[i],
-						offset + tickLength);
+				ofDrawLine(plotTicks[i], offset, plotTicks[i], offset + tickLength);
 			}
 		}
 	}
@@ -277,12 +257,10 @@ void ofxGAxis::drawAsXAxis() const {
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(plotTicks[i] + bounds.height / 2,
-							offset + tickLabelOffset + bounds.width);
+					ofTranslate(plotTicks[i] + bounds.height / 2, offset + tickLabelOffset + bounds.width);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -291,10 +269,8 @@ void ofxGAxis::drawAsXAxis() const {
 		} else {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
-					font.drawString(tickLabels[i],
-							plotTicks[i] - bounds.width / 2,
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
+					font.drawString(tickLabels[i], plotTicks[i] - bounds.width / 2,
 							offset + tickLabelOffset + bounds.height);
 				}
 			}
@@ -316,11 +292,9 @@ void ofxGAxis::drawAsYAxis() const {
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
 			if (log && tickLabels[i] == "") {
-				ofDrawLine(-offset, plotTicks[i], -offset - smallTickLength,
-						plotTicks[i]);
+				ofDrawLine(-offset, plotTicks[i], -offset - smallTickLength, plotTicks[i]);
 			} else {
-				ofDrawLine(-offset, plotTicks[i], -offset - tickLength,
-						plotTicks[i]);
+				ofDrawLine(-offset, plotTicks[i], -offset - tickLength, plotTicks[i]);
 			}
 		}
 	}
@@ -332,12 +306,10 @@ void ofxGAxis::drawAsYAxis() const {
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(-offset - tickLabelOffset,
-							plotTicks[i] + bounds.width / 2);
+					ofTranslate(-offset - tickLabelOffset, plotTicks[i] + bounds.width / 2);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -346,10 +318,8 @@ void ofxGAxis::drawAsYAxis() const {
 		} else {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
-					font.drawString(tickLabels[i],
-							-offset - tickLabelOffset - bounds.width,
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
+					font.drawString(tickLabels[i], -offset - tickLabelOffset - bounds.width,
 							plotTicks[i] + bounds.height / 2);
 				}
 			}
@@ -374,11 +344,9 @@ void ofxGAxis::drawAsTopAxis() const {
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
 			if (log && tickLabels[i] == "") {
-				ofDrawLine(plotTicks[i], -offset, plotTicks[i],
-						-offset - smallTickLength);
+				ofDrawLine(plotTicks[i], -offset, plotTicks[i], -offset - smallTickLength);
 			} else {
-				ofDrawLine(plotTicks[i], -offset, plotTicks[i],
-						-offset - tickLength);
+				ofDrawLine(plotTicks[i], -offset, plotTicks[i], -offset - tickLength);
 			}
 		}
 	}
@@ -390,12 +358,10 @@ void ofxGAxis::drawAsTopAxis() const {
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(plotTicks[i] + bounds.height / 2,
-							-offset - tickLabelOffset);
+					ofTranslate(plotTicks[i] + bounds.height / 2, -offset - tickLabelOffset);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -404,11 +370,8 @@ void ofxGAxis::drawAsTopAxis() const {
 		} else {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
-					font.drawString(tickLabels[i],
-							plotTicks[i] - bounds.width / 2,
-							-offset - tickLabelOffset);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
+					font.drawString(tickLabels[i], plotTicks[i] - bounds.width / 2, -offset - tickLabelOffset);
 				}
 			}
 		}
@@ -433,11 +396,9 @@ void ofxGAxis::drawAsRightAxis() const {
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
 			if (log && tickLabels[i] == "") {
-				ofDrawLine(offset, plotTicks[i], offset + smallTickLength,
-						plotTicks[i]);
+				ofDrawLine(offset, plotTicks[i], offset + smallTickLength, plotTicks[i]);
 			} else {
-				ofDrawLine(offset, plotTicks[i], offset + tickLength,
-						plotTicks[i]);
+				ofDrawLine(offset, plotTicks[i], offset + tickLength, plotTicks[i]);
 			}
 		}
 	}
@@ -449,12 +410,10 @@ void ofxGAxis::drawAsRightAxis() const {
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(offset + tickLabelOffset + bounds.height,
-							plotTicks[i] + bounds.width / 2);
+					ofTranslate(offset + tickLabelOffset + bounds.height, plotTicks[i] + bounds.width / 2);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -463,10 +422,8 @@ void ofxGAxis::drawAsRightAxis() const {
 		} else {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(
-							tickLabels[i], 0, 0);
-					font.drawString(tickLabels[i], offset + tickLabelOffset,
-							plotTicks[i] + bounds.height / 2);
+					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
+					font.drawString(tickLabels[i], offset + tickLabelOffset, plotTicks[i] + bounds.height / 2);
 				}
 			}
 		}
@@ -484,16 +441,15 @@ void ofxGAxis::setDim(float xDim, float yDim) {
 	}
 }
 
-void ofxGAxis::setDim(const array<float, 2> &newDim) {
+void ofxGAxis::setDim(const array<float, 2>& newDim) {
 	setDim(newDim[0], newDim[1]);
 }
 
-void ofxGAxis::setLim(const array<float, 2> &newLim) {
+void ofxGAxis::setLim(const array<float, 2>& newLim) {
 	if (newLim[1] != newLim[0]) {
 		// Make sure the new limits makes sense
 		if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
-			throw invalid_argument(
-					"The axis limits are negative and this is not allowed in logarithmic scale.");
+			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		} else {
 			lim = newLim;
 
@@ -508,12 +464,11 @@ void ofxGAxis::setLim(const array<float, 2> &newLim) {
 	}
 }
 
-void ofxGAxis::setLimAndLog(const array<float, 2> &newLim, bool newLog) {
+void ofxGAxis::setLimAndLog(const array<float, 2>& newLim, bool newLog) {
 	if (newLim[1] != newLim[0]) {
 		// Make sure the new limits makes sense
 		if (newLog && (newLim[0] <= 0 || newLim[1] <= 0)) {
-			throw invalid_argument(
-					"The axis limits are negative and this is not allowed in logarithmic scale.");
+			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		} else {
 			lim = newLim;
 			log = newLog;
@@ -535,8 +490,7 @@ void ofxGAxis::setLog(bool newLog) {
 
 		// Check if the old limits still make sense
 		if (log && (lim[0] <= 0 || lim[1] <= 0)) {
-			throw invalid_argument(
-					"The axis limits are negative and this is not allowed in logarithmic scale.");
+			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		}
 
 		if (!fixedTicks) {
@@ -553,7 +507,7 @@ void ofxGAxis::setOffset(float newOffset) {
 	offset = newOffset;
 }
 
-void ofxGAxis::setLineColor(const ofColor &newLineColor) {
+void ofxGAxis::setLineColor(const ofColor& newLineColor) {
 	lineColor = newLineColor;
 }
 
@@ -590,7 +544,7 @@ void ofxGAxis::setTicksSeparation(float newTicksSeparation) {
 	}
 }
 
-void ofxGAxis::setTicks(const vector<float> &newTicks) {
+void ofxGAxis::setTicks(const vector<float>& newTicks) {
 	fixedTicks = true;
 	ticks = newTicks;
 	updatePlotTicks();
@@ -598,7 +552,7 @@ void ofxGAxis::setTicks(const vector<float> &newTicks) {
 	updateTickLabels();
 }
 
-void ofxGAxis::setTickLabels(const vector<string> &newTickLabels) {
+void ofxGAxis::setTickLabels(const vector<string>& newTickLabels) {
 	if (newTickLabels.size() == tickLabels.size()) {
 		fixedTicks = true;
 		tickLabels = newTickLabels;
@@ -649,16 +603,16 @@ void ofxGAxis::setDrawAxisLabel(bool newDrawAxisLabel) {
 	drawAxisLabel = newDrawAxisLabel;
 }
 
-void ofxGAxis::setAxisLabelText(const string &text) {
+void ofxGAxis::setAxisLabelText(const string& text) {
 	lab.setText(text);
 }
 
-void ofxGAxis::setFontName(const string &newFontName) {
+void ofxGAxis::setFontName(const string& newFontName) {
 	fontName = newFontName;
 	font.load(fontName, fontSize);
 }
 
-void ofxGAxis::setFontColor(const ofColor &newFontColor) {
+void ofxGAxis::setFontColor(const ofColor& newFontColor) {
 	fontColor = newFontColor;
 }
 
@@ -669,8 +623,7 @@ void ofxGAxis::setFontSize(int newFontSize) {
 	}
 }
 
-void ofxGAxis::setFontProperties(const string &newFontName,
-		const ofColor &newFontColor, int newFontSize) {
+void ofxGAxis::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
 	if (newFontSize > 0) {
 		fontName = newFontName;
 		fontColor = newFontColor;
@@ -679,8 +632,7 @@ void ofxGAxis::setFontProperties(const string &newFontName,
 	}
 }
 
-void ofxGAxis::setAllFontProperties(const string &newFontName,
-		const ofColor &newFontColor, int newFontSize) {
+void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
 	setFontProperties(newFontName, newFontColor, newFontSize);
 	lab.setFontProperties(newFontName, newFontColor, newFontSize);
 }

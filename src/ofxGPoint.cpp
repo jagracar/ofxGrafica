@@ -1,34 +1,30 @@
 #include "ofxGPoint.h"
 #include "ofMain.h"
 
-ofxGPoint::ofxGPoint() :
-		x(0), y(0), label(""), valid(true) {
-}
-
-ofxGPoint::ofxGPoint(float _x, float _y, const string &_label) :
+ofxGPoint::ofxGPoint(float _x, float _y, const string& _label) :
 		x(_x), y(_y), label(_label), valid(isfinite(x) && isfinite(y)) {
 }
 
-ofxGPoint::ofxGPoint(const ofVec2f &v, const string &_label) :
-		x(v.x), y(v.y), label(_label), valid(isfinite(x) && isfinite(y)) {
+ofxGPoint::ofxGPoint() :
+		ofxGPoint(0.0, 0.0) {
 }
 
-ofxGPoint::ofxGPoint(const ofxGPoint &p) :
-		x(p.x), y(p.y), label(p.label), valid(p.valid) {
+ofxGPoint::ofxGPoint(const ofVec2f& v, const string& _label) :
+		ofxGPoint(v.x, v.y, _label) {
 }
 
-void ofxGPoint::set(float newX, float newY, const string &newLabel) {
+void ofxGPoint::set(float newX, float newY, const string& newLabel) {
 	x = newX;
 	y = newY;
 	label = newLabel;
 	valid = isfinite(x) && isfinite(y);
 }
 
-void ofxGPoint::set(const ofVec2f &v, const string &newLabel) {
+void ofxGPoint::set(const ofVec2f& v, const string& newLabel) {
 	set(v.x, v.y, newLabel);
 }
 
-void ofxGPoint::set(const ofxGPoint &p) {
+void ofxGPoint::set(const ofxGPoint& p) {
 	set(p.x, p.y, p.label);
 }
 
@@ -48,13 +44,15 @@ void ofxGPoint::setXY(float newX, float newY) {
 	valid = isfinite(x) && isfinite(y);
 }
 
-void ofxGPoint::setXY(const ofVec2f &v) {
-	x = v.x;
-	y = v.y;
-	valid = isfinite(x) && isfinite(y);
+void ofxGPoint::setXY(const ofVec2f& v) {
+	setXY(v.x, v.y);
 }
 
-void ofxGPoint::setLabel(const string &newLabel) {
+void ofxGPoint::setXY(const ofxGPoint& p) {
+	setXY(p.x, p.y);
+}
+
+void ofxGPoint::setLabel(const string& newLabel) {
 	label = newLabel;
 }
 

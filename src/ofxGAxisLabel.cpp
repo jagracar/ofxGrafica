@@ -2,20 +2,15 @@
 #include "ofxGConstants.h"
 #include "ofMain.h"
 
-ofxGAxisLabel::ofxGAxisLabel(ofxGAxisType _type, const array<float, 2> &_dim) :
-		type(_type), dim(_dim) {
+ofxGAxisLabel::ofxGAxisLabel(ofxGAxisType _type, const array<float, 2>& _dim, const string& _text) :
+		type(_type), dim(_dim), text(_text) {
 	// General properties
 	relativePos = 0.5;
+	plotPos = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? relativePos * dim[0] : -relativePos * dim[1];
 	offset = 35;
-	rotate =
-			(type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? false : true;
-
-	plotPos =
-			(type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ?
-					relativePos * dim[0] : -relativePos * dim[1];
+	rotate = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? false : true;
 
 	// Font properties
-	text = "";
 	textAlignment = GRAFICA_CENTER_ALIGN;
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
@@ -42,9 +37,7 @@ void ofxGAxisLabel::draw() const {
 
 void ofxGAxisLabel::drawAsXLabel() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(fontColor);
-
 	ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
 
 	if (rotate) {
@@ -56,15 +49,13 @@ void ofxGAxisLabel::drawAsXLabel() const {
 	} else {
 		switch (textAlignment) {
 		case GRAFICA_CENTER_ALIGN:
-			font.drawString(text, plotPos - bounds.width / 2,
-					offset + bounds.height);
+			font.drawString(text, plotPos - bounds.width / 2, offset + bounds.height);
 			break;
 		case GRAFICA_LEFT_ALIGN:
 			font.drawString(text, plotPos, offset + bounds.height);
 			break;
 		case GRAFICA_RIGHT_ALIGN:
-			font.drawString(text, plotPos - bounds.width,
-					offset + bounds.height);
+			font.drawString(text, plotPos - bounds.width, offset + bounds.height);
 			break;
 		}
 	}
@@ -74,13 +65,12 @@ void ofxGAxisLabel::drawAsXLabel() const {
 
 void ofxGAxisLabel::drawAsYLabel() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(fontColor);
-
 	ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
 
 	if (rotate) {
 		ofPushMatrix();
+
 		switch (textAlignment) {
 		case GRAFICA_CENTER_ALIGN:
 			ofTranslate(-offset, plotPos + bounds.width / 2);
@@ -92,12 +82,12 @@ void ofxGAxisLabel::drawAsYLabel() const {
 			ofTranslate(-offset, plotPos + bounds.width);
 			break;
 		}
+
 		ofRotateZ(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
-		font.drawString(text, -offset - bounds.width,
-				plotPos + bounds.height / 2);
+		font.drawString(text, -offset - bounds.width, plotPos + bounds.height / 2);
 	}
 
 	ofPopStyle();
@@ -105,9 +95,7 @@ void ofxGAxisLabel::drawAsYLabel() const {
 
 void ofxGAxisLabel::drawAsTopLabel() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(fontColor);
-
 	ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
 
 	if (rotate) {
@@ -135,26 +123,24 @@ void ofxGAxisLabel::drawAsTopLabel() const {
 
 void ofxGAxisLabel::drawAsRightLabel() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(fontColor);
-
 	ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
 
 	if (rotate) {
 		ofPushMatrix();
+
 		switch (textAlignment) {
 		case GRAFICA_CENTER_ALIGN:
-			ofTranslate(offset + dim[0] + bounds.height,
-					plotPos + bounds.width / 2);
+			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width / 2);
 			break;
 		case GRAFICA_LEFT_ALIGN:
 			ofTranslate(offset + dim[0] + bounds.height, plotPos);
 			break;
 		case GRAFICA_RIGHT_ALIGN:
-			ofTranslate(offset + dim[0] + bounds.height,
-					plotPos + bounds.width);
+			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width);
 			break;
 		}
+
 		ofRotateZ(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
@@ -166,21 +152,21 @@ void ofxGAxisLabel::drawAsRightLabel() const {
 }
 
 void ofxGAxisLabel::setDim(float xDim, float yDim) {
-	if (xDim > 0 && yDim > 0) {
-		dim = {xDim, yDim};
-		plotPos = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? relativePos * dim[0] : -relativePos * dim[1];
+	if (xDim <= 0 || yDim <= 0) {
+		throw invalid_argument("The dimensions should be larger than zero.");
 	}
+
+	dim = {xDim, yDim};
+	plotPos = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? relativePos * dim[0] : -relativePos * dim[1];
 }
 
-void ofxGAxisLabel::setDim(const array<float, 2> &newDim) {
+void ofxGAxisLabel::setDim(const array<float, 2>& newDim) {
 	setDim(newDim[0], newDim[1]);
 }
 
 void ofxGAxisLabel::setRelativePos(float newRelativePos) {
 	relativePos = newRelativePos;
-	plotPos =
-			(type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ?
-					relativePos * dim[0] : -relativePos * dim[1];
+	plotPos = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? relativePos * dim[0] : -relativePos * dim[1];
 }
 
 void ofxGAxisLabel::setOffset(float newOffset) {
@@ -191,7 +177,7 @@ void ofxGAxisLabel::setRotate(bool newRotate) {
 	rotate = newRotate;
 }
 
-void ofxGAxisLabel::setText(const string &newText) {
+void ofxGAxisLabel::setText(const string& newText) {
 	text = newText;
 }
 
@@ -199,28 +185,31 @@ void ofxGAxisLabel::setTextAlignment(ofxGTextAlignment newTextAlignment) {
 	textAlignment = newTextAlignment;
 }
 
-void ofxGAxisLabel::setFontName(const string &newFontName) {
+void ofxGAxisLabel::setFontName(const string& newFontName) {
 	fontName = newFontName;
 	font.load(fontName, fontSize);
 }
 
-void ofxGAxisLabel::setFontColor(const ofColor &newFontColor) {
+void ofxGAxisLabel::setFontColor(const ofColor& newFontColor) {
 	fontColor = newFontColor;
 }
 
 void ofxGAxisLabel::setFontSize(int newFontSize) {
-	if (newFontSize > 0) {
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }
 
-void ofxGAxisLabel::setFontProperties(const string &newFontName,
-		const ofColor &newFontColor, int newFontSize) {
-	if (newFontSize > 0) {
-		fontName = newFontName;
-		fontColor = newFontColor;
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+void ofxGAxisLabel::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontName = newFontName;
+	fontColor = newFontColor;
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }

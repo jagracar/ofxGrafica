@@ -7,10 +7,8 @@
 class ofxGLayer {
 public:
 	// Constructor
-	ofxGLayer(const string &_id = "defaultId", const array<float, 2> &_dim = {
-			0, 1 }, const array<float, 2> &_xLim = { 0, 1 },
-			const array<float, 2> &_yLim = { 0, 1 }, bool _xLog = false,
-			bool _yLog = false);
+	ofxGLayer(const string &_id = "defaultId", const array<float, 2> &_dim = { 0, 1 }, const array<float, 2> &_xLim = {
+			0, 1 }, const array<float, 2> &_yLim = { 0, 1 }, bool _xLog = false, bool _yLog = false);
 
 	// Special methods
 	bool isId(const string &someId) const;
@@ -31,15 +29,13 @@ public:
 	void drawPoints() const;
 	//void drawPoints(const PShape &pointShape) const;
 	//void drawPoints(const PImage &pointImg) const;
-	void drawPoint(const ofxGPoint &point, const ofColor &pointColor,
-			float pointSize) const;
+	void drawPoint(const ofxGPoint &point, const ofColor &pointColor, float pointSize) const;
 	void drawPoint(const ofxGPoint &point) const;
 	//void drawPoint(const ofxGPoint &point, const PShape &pointShape) const;
 	//void drawPoint(const ofxGPoint &point, const PShape &pointShape, const ofColor &pointColor) const;
 	//void drawPoint(const ofxGPoint &point, const PImage &pointImg) const;
 	void drawLines();
-	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2, int lc,
-			float lw) const;
+	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2, int lc, float lw) const;
 	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2) const;
 	void drawLine(float slope, float yCut, int lc, float lw) const;
 	void drawLine(float slope, float yCut) const;
@@ -51,10 +47,8 @@ public:
 	void drawLabel(const ofxGPoint &point) const;
 	void drawLabelAtPlotPos(float xPlot, float yPlot) const;
 	void drawHistogram() const;
-	void drawPolygon(const vector<ofxGPoint> &polygonPoints,
-			int polygonColor) const;
-	void drawAnnotation(const string &text, float x, float y, int horAlign,
-			int verAlign) const;
+	void drawPolygon(const vector<ofxGPoint> &polygonPoints, int polygonColor) const;
+	void drawAnnotation(const string &text, float x, float y, int horAlign, int verAlign) const;
 
 	// Setter methods
 	void setDim(float xDim, float yDim);
@@ -64,12 +58,9 @@ public:
 	void setYLim(float yMin, float yMax);
 	void setYLim(const array<float, 2> &newYLim);
 	void setXYLim(float xMin, float xMax, float yMin, float yMax);
-	void setXYLim(const array<float, 2> &newXLim,
-			const array<float, 2> &newYLim);
-	void setLimAndLog(float xMin, float xMax, float yMin, float yMax,
-			bool newXLog, bool newYLog);
-	void setLimAndLog(const array<float, 2> &newXLim,
-			const array<float, 2> &newYLim, bool newXLog, bool newYLog);
+	void setXYLim(const array<float, 2> &newXLim, const array<float, 2> &newYLim);
+	void setLimAndLog(float xMin, float xMax, float yMin, float yMax, bool newXLog, bool newYLog);
+	void setLimAndLog(const array<float, 2> &newXLim, const array<float, 2> &newYLim, bool newXLog, bool newYLog);
 	void setXLog(bool newXLog);
 	void setYLog(bool newYLog);
 	void setPoints(const vector<ofxGPoint> &newPoints);
@@ -96,14 +87,12 @@ public:
 	void setHistVisible(bool visible);
 	void setDrawHistLabels(bool drawHistLabels);
 	void setLabelBgColor(const ofColor &newLabelBgColor);
-	void setLabelSeparation(const array<float,2> &newLabelSeparation);
+	void setLabelSeparation(const array<float, 2> &newLabelSeparation);
 	void setFontName(const string &newFontName);
 	void setFontColor(const ofColor &newFontColor);
 	void setFontSize(int newFontSize);
-	void setFontProperties(const string &newFontName,
-			const ofColor &newFontColor, int newFontSize);
-	void setAllFontProperties(const string &newFontName,
-			const ofColor &newFontColor, int newFontSize);
+	void setFontProperties(const string &newFontName, const ofColor &newFontColor, int newFontSize);
+	void setAllFontProperties(const string &newFontName, const ofColor &newFontColor, int newFontSize);
 
 	// Getter methods
 	string getId() const;
@@ -125,14 +114,11 @@ protected:
 	float xPlotToValue(float xPlot) const;
 	float yPlotToValue(float yPlot) const;
 	void updateInsideList();
-	int obtainBoxIntersections(const ofxGPoint &plotPoint1,
+	int obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoint &plotPoint2);
+	int getValidCuts(array<array<float, 2>, 4> &cuts, int nCuts, const ofxGPoint &plotPoint1,
 			const ofxGPoint &plotPoint2);
-	int getValidCuts(array<array<float, 2>, 4> &cuts, int nCuts,
-			const ofxGPoint &plotPoint1, const ofxGPoint &plotPoint2);
-	int removeDuplicatedCuts(array<array<float, 2>, 4> &cuts, int nCuts,
-			float tolerance);
-	int removePointFromCuts(array<array<float, 2>, 4> &cuts, int nCuts,
-			const ofxGPoint &plotPoint, float tolerance);
+	int removeDuplicatedCuts(array<array<float, 2>, 4> &cuts, int nCuts, float tolerance);
+	int removePointFromCuts(array<array<float, 2>, 4> &cuts, int nCuts, const ofxGPoint &plotPoint, float tolerance);
 	vector<ofxGPoint> &getHorizontalShape(float referenceValue);
 	vector<ofxGPoint> &getVerticalShape(float referenceValue);
 

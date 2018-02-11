@@ -6,25 +6,24 @@
 class ofxGAxisLabel {
 public:
 	// Constructor
-	ofxGAxisLabel(ofxGAxisType _type = GRAFICA_X_AXIS,
-			const array<float, 2> &_dim = { 0, 1 });
+	ofxGAxisLabel(ofxGAxisType _type = GRAFICA_X_AXIS, const array<float, 2>& _dim = { 0, 100 }, const string& _text =
+			"");
 
 	// Drawing methods
 	void draw() const;
 
 	// Setter methods
 	void setDim(float xDim, float yDim);
-	void setDim(const array<float, 2> &newDim);
+	void setDim(const array<float, 2>& newDim);
 	void setRelativePos(float newRelativePos);
 	void setOffset(float newOffset);
 	void setRotate(bool newRotate);
-	void setText(const string &newText);
+	void setText(const string& newText);
 	void setTextAlignment(ofxGTextAlignment newTextAlignment);
-	void setFontName(const string &newFontName);
-	void setFontColor(const ofColor &newFontColor);
+	void setFontName(const string& newFontName);
+	void setFontColor(const ofColor& newFontColor);
 	void setFontSize(int newFontSize);
-	void setFontProperties(const string &newFontName, const ofColor &newFontColor,
-			int newFontSize);
+	void setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize);
 
 protected:
 	// Drawing methods
@@ -36,13 +35,13 @@ protected:
 	// General properties
 	ofxGAxisType type;
 	array<float, 2> dim;
+	string text;
 	float relativePos;
 	float offset;
-	bool rotate;
 	float plotPos;
+	bool rotate;
 
 	// Font properties
-	string text;
 	ofxGTextAlignment textAlignment;
 	string fontName;
 	ofColor fontColor;

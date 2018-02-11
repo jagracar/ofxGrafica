@@ -13,8 +13,7 @@ public:
 	static const int NONE = 0;
 
 	// Constructor
-	ofxGPlot(float xPos = 0, float yPos = 0, float plotWidth = 450,
-			float plotHeight = 300);
+	ofxGPlot(float xPos = 0, float yPos = 0, float plotWidth = 450, float plotHeight = 300);
 
 	// Other methods
 	void addLayer(ofxGLayer &newLayer);
@@ -23,8 +22,7 @@ public:
 	array<float, 2> getPlotPosAt(float xScreen, float yScreen) const;
 	array<float, 2> getScreenPosAtValue(float xValue, float yValue) const;
 	ofxGPoint getPointAt(float xScreen, float yScreen) const;
-	ofxGPoint getPointAt(float xScreen, float yScreen,
-			const string &layerId) const;
+	ofxGPoint getPointAt(float xScreen, float yScreen, const string &layerId) const;
 	void addPointAt(float xScreen, float yScreen);
 	void addPointAt(float xScreen, float yScreen, const string &layerId);
 	void removePointAt(float xScreen, float yScreen);
@@ -34,17 +32,16 @@ public:
 	bool isOverPlot(float xScreen, float yScreen) const;
 	bool isOverBox(float xScreen, float yScreen) const;
 	void updateLimits();
-	array<float, 2> calculatePlotXLim() const;
-	array<float, 2> calculatePlotYLim() const;
-	array<float, 2> calculatePointsXLim(const vector<ofxGPoint> &points) const;
-	array<float, 2> calculatePointsYLim(const vector<ofxGPoint> &points) const;
+	array<float, 2> calculatePlotXLim();
+	array<float, 2> calculatePlotYLim();
+	array<float, 2> calculatePointsXLim(const vector<ofxGPoint> &points);
+	array<float, 2> calculatePointsYLim(const vector<ofxGPoint> &points);
 	void moveHorizontalAxesLim(float delta);
 	void moveVerticalAxesLim(float delta);
 	void centerAndZoom(float factor, float xValue, float yValue);
 	void zoom(float factor);
 	void zoom(float factor, float xScreen, float yScreen);
-	void shiftPlotPos(const array<float, 2> &valuePlotPos,
-			const array<float, 2> &newPlotPos);
+	void shiftPlotPos(const array<float, 2> &valuePlotPos, const array<float, 2> &newPlotPos);
 	void align(float xValue, float yValue, float xScreen, float yScreen);
 	void align(const array<float, 2> & value, float xScreen, float yScreen);
 	void center(float xScreen, float yScreen);
@@ -64,24 +61,19 @@ public:
 	void drawPoints() const;
 	//void drawPoints(const PShape &pointShape) const;
 	//void drawPoints(const PImage &pointImg) const;
-	void drawPoint(const ofxGPoint &point, const ofColor &pointColor,
-			float pointSize) const;
+	void drawPoint(const ofxGPoint &point, const ofColor &pointColor, float pointSize) const;
 	void drawPoint(const ofxGPoint &point) const;
 	//void drawPoint(const ofxGPoint &point, const PShape &pointShape) const;
 	//void drawPoint(const ofxGPoint &point, const PShape &pointShape, const ofColor &pointColor) const;
 	//void drawPoint(const ofxGPoint &point, const PImage &pointImg) const;
 	void drawLines();
-	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2,
-			const ofColor &lineColor, float lineWidth) const;
+	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2, const ofColor &lineColor, float lineWidth) const;
 	void drawLine(const ofxGPoint &point1, const ofxGPoint &point2) const;
-	void drawLine(float slope, float yCut, const ofColor &lineColor,
-			float lineWidth) const;
+	void drawLine(float slope, float yCut, const ofColor &lineColor, float lineWidth) const;
 	void drawLine(float slope, float yCut) const;
-	void drawHorizontalLine(float value, const ofColor &lineColor,
-			float lineWidth) const;
+	void drawHorizontalLine(float value, const ofColor &lineColor, float lineWidth) const;
 	void drawHorizontalLine(float value) const;
-	void drawVerticalLine(float value, const ofColor &lineColor,
-			float lineWidth) const;
+	void drawVerticalLine(float value, const ofColor &lineColor, float lineWidth) const;
 	void drawVerticalLine(float value) const;
 	void drawFilledContours(int contourType, float referenceValue) const;
 	void drawLabel(const ofxGPoint &point) const;
@@ -89,12 +81,9 @@ public:
 	void drawLabels() const;
 	void drawGridLines(int gridType) const;
 	void drawHistograms();
-	void drawPolygon(const vector<ofxGPoint> &polygonPoints,
-			const ofColor &polygonColor) const;
-	void drawAnnotation(const string &text, float x, float y, int horAlign,
-			int verAlign) const;
-	void drawLegend(const vector<string> &text,
-			const vector<float> &xRelativePos,
+	void drawPolygon(const vector<ofxGPoint> &polygonPoints, const ofColor &polygonColor) const;
+	void drawAnnotation(const string &text, float x, float y, int horAlign, int verAlign) const;
+	void drawLegend(const vector<string> &text, const vector<float> &xRelativePos,
 			const vector<float> &yRelativePos) const;
 
 	// Setter methods
@@ -102,8 +91,7 @@ public:
 	void setPos(const array<float, 2> &newPos);
 	void setOuterDim(float xOuterDim, float yOuterDim);
 	void setOuterDim(const array<float, 2> &newOuterDim);
-	void setMar(float bottomMargin, float leftMargin, float topMargin,
-			float rightMargin);
+	void setMar(float bottomMargin, float leftMargin, float topMargin, float rightMargin);
 	void setMar(const array<float, 4> &newMar);
 	void setDim(float xDim, float yDim);
 	void setDim(const array<float, 2> &newDim);
@@ -129,8 +117,7 @@ public:
 	void setPoints(const vector<ofxGPoint> &points);
 	void setPoints(const vector<ofxGPoint> &points, const string &layerId);
 	void setPoint(int index, float x, float y, const string &label);
-	void setPoint(int index, float x, float y, const string &label,
-			const string &layerId);
+	void setPoint(int index, float x, float y, const string &label, const string &layerId);
 	void setPoint(int index, float x, float y);
 	void setPoint(int index, const ofxGPoint &newPoint);
 	void setPoint(int index, const ofxGPoint &newPoint, const string &layerId);
@@ -140,8 +127,7 @@ public:
 	void addPoint(const ofxGPoint &newPoint);
 	void addPoint(const ofxGPoint &newPoint, const string &layerId);
 	void addPoint(int index, float x, float y, const string &label);
-	void addPoint(int index, float x, float y, const string &label,
-			const string &layerId);
+	void addPoint(int index, float x, float y, const string &label, const string &layerId);
 	void addPoint(int index, float x, float y);
 	void addPoint(int index, const ofxGPoint &newPoint);
 	void addPoint(int index, const ofxGPoint &newPoint, const string &layerId);
@@ -177,6 +163,31 @@ public:
 	void setAllFontProperties(const string &fontName, const ofColor &fontColor, int fontSize);
 
 	// Getter methods
+	array<float, 2> getPos() const;
+	array<float, 2> getOuterDim() const;
+	array<float, 4> getMar() const;
+	array<float, 2> getDim() const;
+	array<float, 2> getXLim() const;
+	array<float, 2> getYLim() const;
+	bool getFixedXLim() const;
+	bool getFixedYLim() const;
+	bool getXLog() const;
+	bool getYLog() const;
+	bool getInvertedXScale();
+	bool getInvertedYScale();
+	ofxGLayer &getMainLayer();
+	ofxGLayer &getLayer(const string &id);
+	ofxGAxis &getXAxis();
+	ofxGAxis &getTopAxis();
+	ofxGAxis &getYAxis();
+	ofxGAxis &getRightAxis();
+	ofxGTitle &getTitle();
+	vector<ofxGPoint> getPoints() const;
+	vector<ofxGPoint> getPoints(const string &layerId) const;
+	vector<ofxGPoint> &getPointsRef();
+	vector<ofxGPoint> &getPointsRef(const string &layerId);
+	ofxGHistogram &getHistogram();
+	ofxGHistogram &getHistogram(const string &layerId);
 
 protected:
 

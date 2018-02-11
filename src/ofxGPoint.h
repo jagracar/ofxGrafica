@@ -6,19 +6,19 @@ class ofxGPoint {
 public:
 	// Constructors
 	ofxGPoint();
-	ofxGPoint(float _x, float _y, const string &_label = "");
-	ofxGPoint(const ofVec2f &v, const string &_label = "");
-	ofxGPoint(const ofxGPoint &p);
+	ofxGPoint(float _x, float _y, const string& _label = "");
+	ofxGPoint(const ofVec2f& v, const string& _label = "");
 
 	// Setter methods
-	void set(float newX, float newY, const string &newLabel);
-	void set(const ofVec2f &v, const string &newLabel);
-	void set(const ofxGPoint &p);
+	void set(float newX, float newY, const string& newLabel);
+	void set(const ofVec2f& v, const string& newLabel);
+	void set(const ofxGPoint& p);
 	void setX(float newX);
 	void setY(float newY);
 	void setXY(float newX, float newY);
-	void setXY(const ofVec2f &v);
-	void setLabel(const string &newLabel);
+	void setXY(const ofVec2f& v);
+	void setXY(const ofxGPoint& p);
+	void setLabel(const string& newLabel);
 
 	// Getter methods
 	float getX() const;
@@ -28,6 +28,7 @@ public:
 	bool isValid() const;
 
 protected:
+	// General properties
 	float x;
 	float y;
 	string label;

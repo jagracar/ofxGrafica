@@ -6,33 +6,32 @@
 class ofxGTitle {
 public:
 	// Constructor
-	ofxGTitle(const array<float, 2> &_dim = { 0, 1 });
+	ofxGTitle(const array<float, 2>& _dim = { 0, 100 }, const string& _text = "");
 
 	// Drawing methods
 	void draw() const;
 
 	// Setter methods
 	void setDim(float xDim, float yDim);
-	void setDim(const array<float, 2> &newDim);
+	void setDim(const array<float, 2>& newDim);
 	void setRelativePos(float newRelativePos);
 	void setOffset(float newOffset);
-	void setText(const string &newText);
+	void setText(const string& newText);
 	void setTextAlignment(ofxGTextAlignment newTextAlignment);
-	void setFontName(const string &newFontName);
-	void setFontColor(const ofColor &newFontColor);
+	void setFontName(const string& newFontName);
+	void setFontColor(const ofColor& newFontColor);
 	void setFontSize(int newFontSize);
-	void setFontProperties(const string &newFontName, const ofColor &newFontColor, int newFontSize);
+	void setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize);
 
 protected:
-
 	// General properties
 	array<float, 2> dim;
+	string text;
 	float relativePos;
 	float plotPos;
 	float offset;
 
 	// Font properties
-	string text;
 	ofxGTextAlignment textAlignment;
 	string fontName;
 	ofColor fontColor;
