@@ -46,9 +46,9 @@ public:
 
 	// Getter methods
 	vector<float> getTicks() const;
-	vector<float>& getTicksRef();
+	const vector<float>& getTicksRef();
 	vector<float> getPlotTicks() const;
-	vector<float>& getPlotTicksRef();
+	const vector<float>& getPlotTicksRef();
 	ofxGAxisLabel& getAxisLabel();
 
 protected:

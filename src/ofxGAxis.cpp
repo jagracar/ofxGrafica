@@ -728,7 +728,7 @@ vector<float> ofxGAxis::getTicks() const {
 	}
 }
 
-vector<float>& ofxGAxis::getTicksRef() {
+const vector<float>& ofxGAxis::getTicksRef() {
 	return ticks;
 }
 
@@ -749,7 +749,7 @@ vector<float> ofxGAxis::getPlotTicks() const {
 	}
 }
 
-vector<float>& ofxGAxis::getPlotTicksRef() {
+const vector<float>& ofxGAxis::getPlotTicksRef() {
 	return plotTicks;
 }
 
