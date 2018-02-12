@@ -10,6 +10,9 @@ public:
 	ofxGAxis(ofxGAxisType _type = GRAFICA_X_AXIS, const array<float, 2>& _dim = { 0, 100 },
 			const array<float, 2>& _lim = { 0, 1 }, bool _log = false);
 
+	// Special methods
+	void moveLim(array<float, 2>& newLim);
+
 	// Drawing methods
 	void draw() const;
 
@@ -81,7 +84,6 @@ protected:
 	// Ticks properties
 	int nTicks;
 	float ticksSeparation;
-	int ticksPrecission;
 	vector<float> ticks;
 	vector<float> plotTicks;
 	vector<bool> ticksInside;

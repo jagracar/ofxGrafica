@@ -18,7 +18,6 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<
 	// Ticks properties
 	nTicks = 5;
 	ticksSeparation = -1;
-	ticksPrecission = 0;
 	fixedTicks = false;
 	tickLength = 3;
 	smallTickLength = 2;
@@ -62,8 +61,8 @@ void ofxGAxis::updateTicks() {
 
 void ofxGAxis::obtainLogarithmicTicks() {
 	// Get the exponents of the first and last ticks in increasing order
-	int firstExp = (lim[1] > lim[0]) ? floor(log10(lim[0])) : floor(log10(lim[1]));
-	int lastExp = (lim[1] > lim[0]) ? ceil(log10(lim[1])) : ceil(log10(lim[0]));
+	int firstExp = floor(log10(min(lim[0], lim[1])));
+	int lastExp = ceil(log10(max(lim[0], lim[1])));
 
 	// Fill the ticks container
 	ticks.clear();
@@ -71,7 +70,7 @@ void ofxGAxis::obtainLogarithmicTicks() {
 	for (int exp = firstExp; exp < lastExp; ++exp) {
 		float base = pow(10, exp);
 
-		for (int i = 1; i <= 9; ++i) {
+		for (int i = 1; i < 10; ++i) {
 			ticks.push_back(i * base);
 		}
 	}
@@ -80,27 +79,28 @@ void ofxGAxis::obtainLogarithmicTicks() {
 }
 
 void ofxGAxis::obtainLinearTicks() {
-	// Obtain the required precision for the ticks
+	// Obtain the required tick precision
 	float step = 0;
 	int nSteps = 0;
+	float sigDigits = 0;
 
 	if (ticksSeparation > 0) {
 		step = (lim[1] > lim[0]) ? ticksSeparation : -ticksSeparation;
-		ticksPrecission = obtainSigDigits(step);
+		sigDigits = obtainSigDigits(step);
 
-		while (abs(roundPlus(step, ticksPrecission) - step) > abs(0.001 * step)) {
-			++ticksPrecission;
+		while (abs(roundPlus(step, sigDigits) - step) > abs(0.001 * step)) {
+			++sigDigits;
 		}
 
 		nSteps = floor((lim[1] - lim[0]) / step);
 	} else if (nTicks > 0) {
 		step = (lim[1] - lim[0]) / nTicks;
-		ticksPrecission = obtainSigDigits(step);
-		step = roundPlus(step, ticksPrecission);
+		sigDigits = obtainSigDigits(step);
+		step = roundPlus(step, sigDigits);
 
 		if (step == 0 || abs(step) > abs(lim[1] - lim[0])) {
-			ticksPrecission++;
-			step = roundPlus((lim[1] - lim[0]) / nTicks, ticksPrecission);
+			sigDigits++;
+			step = roundPlus((lim[1] - lim[0]) / nTicks, sigDigits);
 		}
 
 		nSteps = floor((lim[1] - lim[0]) / step);
@@ -114,19 +114,17 @@ void ofxGAxis::obtainLinearTicks() {
 		float firstTick = lim[0] + ((lim[1] - lim[0]) - nSteps * step) / 2;
 
 		// Subtract some steps to be sure we have all
-		firstTick = roundPlus(firstTick - 2 * step, ticksPrecission);
+		firstTick = roundPlus(firstTick - 2 * step, sigDigits);
 
 		while ((lim[1] - firstTick) * (lim[0] - firstTick) > 0) {
-			firstTick = roundPlus(firstTick + step, ticksPrecission);
+			firstTick = roundPlus(firstTick + step, sigDigits);
 		}
 
 		// Calculate the rest of the ticks
-		int n = floor(abs((lim[1] - firstTick) / step)) + 1;
+		int n = floor((lim[1] - firstTick) / step) + 1;
 
-		ticks.push_back(firstTick);
-
-		for (int i = 1; i < n; ++i) {
-			ticks.push_back(roundPlus(ticks.back() + step, ticksPrecission));
+		for (int i = 0; i < n; ++i) {
+			ticks.push_back(roundPlus(firstTick + i * step, sigDigits));
 		}
 	}
 }
@@ -178,24 +176,22 @@ void ofxGAxis::updateTickLabels() {
 
 	if (log) {
 		for (float tick : ticks) {
-			if (tick > 0) {
-				float logValue = log10(tick);
-				bool isExactLogValue = abs(logValue - round(logValue)) < 0.0001;
+			float logValue = log10(tick);
+			bool isExactLogValue = abs(logValue - round(logValue)) < 0.0001;
 
-				if (isExactLogValue) {
-					logValue = round(logValue);
+			if (isExactLogValue) {
+				logValue = round(logValue);
 
-					if (expTickLabels) {
-						tickLabels.push_back("1e" + to_string((int) logValue));
-					} else {
-						if (logValue > -3.1 && logValue < 3.1) {
-							tickLabels.push_back((logValue >= 0) ? to_string((int) tick) : to_string(tick));
-						} else {
-							tickLabels.push_back("1e" + to_string((int) logValue));
-						}
-					}
+				if (expTickLabels) {
+					tickLabels.push_back("1e" + to_string((int) logValue));
 				} else {
-					tickLabels.push_back("");
+					if (logValue > -3.1 && logValue < 3.1) {
+						ss.str("");
+						ss << std::defaultfloat << tick;
+						tickLabels.push_back(ss.str());
+					} else {
+						tickLabels.push_back("1e" + to_string((int) logValue));
+					}
 				}
 			} else {
 				tickLabels.push_back("");
@@ -204,10 +200,80 @@ void ofxGAxis::updateTickLabels() {
 	} else {
 		for (float tick : ticks) {
 			ss.str("");
-			ss << std::fixed << std::setprecision(ticksPrecission) << tick;
-			tickLabels.push_back((fmod(tick, 1) == 0 && abs(tick) < 1e9) ? to_string((int) tick) : ss.str());
+			ss << std::defaultfloat << tick;
+			tickLabels.push_back(ss.str());
 		}
 	}
+}
+
+void ofxGAxis::moveLim(array<float, 2>& newLim) {
+	// Check that the new limit makes sense
+	if (newLim[1] == newLim[0]) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
+	}
+
+	// Update the limits
+	lim = newLim;
+
+	// Calculate the new ticks if they are not fixed
+	if (!fixedTicks) {
+		int n = ticks.size();
+
+		if (log) {
+			obtainLogarithmicTicks();
+		} else if (n > 0) {
+			// Obtain the ticks precision and the tick separation
+			float step = 0;
+			int sigDigits = 0;
+
+			if (ticksSeparation > 0) {
+				step = (lim[1] > lim[0]) ? ticksSeparation : -ticksSeparation;
+				sigDigits = obtainSigDigits(step);
+
+				while (abs(roundPlus(step, sigDigits) - step) > abs(0.001 * step)) {
+					sigDigits++;
+				}
+			} else {
+				step = (n == 1) ? lim[1] - lim[0] : ticks[1] - ticks[0];
+				sigDigits = obtainSigDigits(step);
+				step = roundPlus(step, sigDigits);
+
+				if (step == 0 || abs(step) > abs(lim[1] - lim[0])) {
+					sigDigits++;
+					step = (n == 1) ? lim[1] - lim[0] : ticks[1] - ticks[0];
+					step = roundPlus(step, sigDigits);
+				}
+
+				step = (lim[1] > lim[0]) ? abs(step) : -abs(step);
+			}
+
+			// Obtain the first tick
+			float firstTick = ticks[0] + step * ceil((lim[0] - ticks[0]) / step);
+			firstTick = roundPlus(firstTick, sigDigits);
+
+			if ((lim[1] - firstTick) * (lim[0] - firstTick) > 0) {
+				firstTick = ticks[0] + step * floor((lim[0] - ticks[0]) / step);
+				firstTick = roundPlus(firstTick, sigDigits);
+			}
+
+			// Calculate the rest of the ticks
+			n = floor(abs((lim[1] - firstTick) / step)) + 1;
+			ticks.clear();
+
+			for (int i = 0; i < n; i++) {
+				ticks.push_back(roundPlus(firstTick + i * step, sigDigits));
+			}
+		}
+
+		// Obtain the new tick labels
+		updateTickLabels();
+	}
+
+	// Update the rest of the arrays
+	updatePlotTicks();
+	updateTicksInside();
 }
 
 void ofxGAxis::draw() const {
@@ -233,7 +299,6 @@ void ofxGAxis::draw() const {
 
 void ofxGAxis::drawAsXAxis() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(lineColor);
 	ofSetLineWidth(lineWidth);
 
@@ -282,7 +347,6 @@ void ofxGAxis::drawAsXAxis() const {
 
 void ofxGAxis::drawAsYAxis() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(lineColor);
 	ofSetLineWidth(lineWidth);
 
@@ -331,7 +395,6 @@ void ofxGAxis::drawAsYAxis() const {
 
 void ofxGAxis::drawAsTopAxis() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(lineColor);
 	ofSetLineWidth(lineWidth);
 
@@ -383,7 +446,6 @@ void ofxGAxis::drawAsTopAxis() const {
 
 void ofxGAxis::drawAsRightAxis() const {
 	ofPushStyle();
-	ofFill();
 	ofSetColor(lineColor);
 	ofSetLineWidth(lineWidth);
 
@@ -434,11 +496,13 @@ void ofxGAxis::drawAsRightAxis() const {
 }
 
 void ofxGAxis::setDim(float xDim, float yDim) {
-	if (xDim > 0 && yDim > 0) {
-		dim = {xDim, yDim};
-		updatePlotTicks();
-		lab.setDim(dim);
+	if (xDim <= 0 || yDim <= 0) {
+		throw invalid_argument("The dimensions should be larger than zero.");
 	}
+
+	dim = {xDim, yDim};
+	updatePlotTicks();
+	lab.setDim(dim);
 }
 
 void ofxGAxis::setDim(const array<float, 2>& newDim) {
@@ -446,52 +510,52 @@ void ofxGAxis::setDim(const array<float, 2>& newDim) {
 }
 
 void ofxGAxis::setLim(const array<float, 2>& newLim) {
-	if (newLim[1] != newLim[0]) {
-		// Make sure the new limits makes sense
-		if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		} else {
-			lim = newLim;
-
-			if (!fixedTicks) {
-				updateTicks();
-				updateTickLabels();
-			}
-
-			updatePlotTicks();
-			updateTicksInside();
-		}
+	// Check that the new limit makes sense
+	if (newLim[1] == newLim[0]) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
+
+	lim = newLim;
+
+	if (!fixedTicks) {
+		updateTicks();
+		updateTickLabels();
+	}
+
+	updatePlotTicks();
+	updateTicksInside();
 }
 
 void ofxGAxis::setLimAndLog(const array<float, 2>& newLim, bool newLog) {
-	if (newLim[1] != newLim[0]) {
-		// Make sure the new limits makes sense
-		if (newLog && (newLim[0] <= 0 || newLim[1] <= 0)) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		} else {
-			lim = newLim;
-			log = newLog;
-
-			if (!fixedTicks) {
-				updateTicks();
-				updateTickLabels();
-			}
-
-			updatePlotTicks();
-			updateTicksInside();
-		}
+	// Check that the new limit makes sense
+	if (newLim[1] == newLim[0]) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
+
+	lim = newLim;
+	log = newLog;
+
+	if (!fixedTicks) {
+		updateTicks();
+		updateTickLabels();
+	}
+
+	updatePlotTicks();
+	updateTicksInside();
 }
 
 void ofxGAxis::setLog(bool newLog) {
 	if (newLog != log) {
-		log = newLog;
-
 		// Check if the old limits still make sense
-		if (log && (lim[0] <= 0 || lim[1] <= 0)) {
+		if (newLog && (lim[0] <= 0 || lim[1] <= 0)) {
 			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		}
+
+		log = newLog;
 
 		if (!fixedTicks) {
 			updateTicks();
@@ -512,28 +576,32 @@ void ofxGAxis::setLineColor(const ofColor& newLineColor) {
 }
 
 void ofxGAxis::setLineWidth(float newLineWidth) {
-	if (newLineWidth > 0) {
-		lineWidth = newLineWidth;
+	if (newLineWidth <= 0) {
+		throw invalid_argument("The line width should be larger than zero.");
 	}
+
+	lineWidth = newLineWidth;
 }
 
 void ofxGAxis::setNTicks(int newNTicks) {
-	if (newNTicks >= 0) {
-		nTicks = newNTicks;
-		ticksSeparation = -1;
+	if (newNTicks < 0) {
+		throw invalid_argument("The number of ticks should be equal or larger than zero.");
+	}
 
-		if (!log) {
-			fixedTicks = false;
-			updateTicks();
-			updatePlotTicks();
-			updateTicksInside();
-			updateTickLabels();
-		}
+	nTicks = newNTicks;
+	ticksSeparation = -1;
+
+	if (!log) {
+		fixedTicks = false;
+		updateTicks();
+		updatePlotTicks();
+		updateTicksInside();
+		updateTickLabels();
 	}
 }
 
 void ofxGAxis::setTicksSeparation(float newTicksSeparation) {
-	ticksSeparation = newTicksSeparation;
+	ticksSeparation = abs(newTicksSeparation);
 
 	if (!log) {
 		fixedTicks = false;
@@ -553,10 +621,12 @@ void ofxGAxis::setTicks(const vector<float>& newTicks) {
 }
 
 void ofxGAxis::setTickLabels(const vector<string>& newTickLabels) {
-	if (newTickLabels.size() == tickLabels.size()) {
-		fixedTicks = true;
-		tickLabels = newTickLabels;
+	if (newTickLabels.size() != tickLabels.size()) {
+		throw invalid_argument("The number of ticks and tick labels should be the same.");
 	}
+
+	fixedTicks = true;
+	tickLabels = newTickLabels;
 }
 
 void ofxGAxis::setFixedTicks(bool newFixedTicks) {
@@ -617,19 +687,23 @@ void ofxGAxis::setFontColor(const ofColor& newFontColor) {
 }
 
 void ofxGAxis::setFontSize(int newFontSize) {
-	if (newFontSize > 0) {
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }
 
 void ofxGAxis::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
-	if (newFontSize > 0) {
-		fontName = newFontName;
-		fontColor = newFontColor;
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontName = newFontName;
+	fontColor = newFontColor;
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }
 
 void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -638,22 +712,47 @@ void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& ne
 }
 
 vector<float> ofxGAxis::getTicks() const {
-	return ticks;
+	if (fixedTicks) {
+		return ticks;
+	} else {
+		// Return only the ticks that are inside the plot
+		vector<float> validTicks;
+
+		for (vector<float>::size_type i = 0; i < ticks.size(); ++i) {
+			if (ticksInside[i]) {
+				validTicks.push_back(ticks[i]);
+			}
+		}
+
+		return validTicks;
+	}
 }
 
-vector<float> &ofxGAxis::getTicksRef() {
+vector<float>& ofxGAxis::getTicksRef() {
 	return ticks;
 }
 
 vector<float> ofxGAxis::getPlotTicks() const {
+	if (fixedTicks) {
+		return plotTicks;
+	} else {
+		// Return only the plot ticks that are inside the plot
+		vector<float> validPlotTicks;
+
+		for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
+			if (ticksInside[i]) {
+				validPlotTicks.push_back(plotTicks[i]);
+			}
+		}
+
+		return validPlotTicks;
+	}
+}
+
+vector<float>& ofxGAxis::getPlotTicksRef() {
 	return plotTicks;
 }
 
-vector<float> &ofxGAxis::getPlotTicksRef() {
-	return plotTicks;
-}
-
-ofxGAxisLabel &ofxGAxis::getAxisLabel() {
+ofxGAxisLabel& ofxGAxis::getAxisLabel() {
 	return lab;
 }
-
