@@ -57,6 +57,9 @@ void ofxGAxisLabel::drawAsXLabel() const {
 		case GRAFICA_RIGHT_ALIGN:
 			font.drawString(text, plotPos - bounds.width, offset + bounds.height);
 			break;
+		default:
+			font.drawString(text, plotPos - bounds.width / 2, offset + bounds.height);
+			break;
 		}
 	}
 
@@ -80,6 +83,9 @@ void ofxGAxisLabel::drawAsYLabel() const {
 			break;
 		case GRAFICA_RIGHT_ALIGN:
 			ofTranslate(-offset, plotPos + bounds.width);
+			break;
+		default:
+			ofTranslate(-offset, plotPos + bounds.width / 2);
 			break;
 		}
 
@@ -115,6 +121,9 @@ void ofxGAxisLabel::drawAsTopLabel() const {
 		case GRAFICA_RIGHT_ALIGN:
 			font.drawString(text, plotPos - bounds.width, -offset - dim[1]);
 			break;
+		default:
+			font.drawString(text, plotPos - bounds.width / 2, -offset - dim[1]);
+			break;
 		}
 	}
 
@@ -138,6 +147,9 @@ void ofxGAxisLabel::drawAsRightLabel() const {
 			break;
 		case GRAFICA_RIGHT_ALIGN:
 			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width);
+			break;
+		default:
+			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width / 2);
 			break;
 		}
 

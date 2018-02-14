@@ -49,14 +49,14 @@ array<float, 2> ofxGPlot::getScreenPosAtValue(float xValue, float yValue) const 
 	return {xScreen, yScreen};
 }
 
-ofxGPoint ofxGPlot::getPointAt(float xScreen, float yScreen) const {
+const ofxGPoint* ofxGPlot::getPointAt(float xScreen, float yScreen) const {
 	array<float, 2> plotPos = getPlotPosAt(xScreen, yScreen);
 
 	return mainLayer.getPointAtPlotPos(plotPos[0], plotPos[1]);
 }
 
-ofxGPoint ofxGPlot::getPointAt(float xScreen, float yScreen, const string &layerId) const {
-	ofxGPoint p;
+const ofxGPoint* ofxGPlot::getPointAt(float xScreen, float yScreen, const string &layerId) const {
+	const ofxGPoint* p = nullptr;
 
 	if (mainLayer.isId(layerId)) {
 		p = getPointAt(xScreen, yScreen);
@@ -809,7 +809,7 @@ void ofxGPlot::setHistBasePoint(const ofxGPoint &basePoint) {
 	mainLayer.setHistBasePoint(basePoint);
 }
 
-void ofxGPlot::setHistType(int histType) {
+void ofxGPlot::setHistType(ofxGHistogramType histType) {
 	mainLayer.setHistType(histType);
 }
 
@@ -955,16 +955,16 @@ bool ofxGPlot::getInvertedYScale() {
 	return invertedYScale;
 }
 
-ofxGLayer &ofxGPlot::getMainLayer() {
+ofxGLayer& ofxGPlot::getMainLayer() {
 	return mainLayer;
 }
 
-ofxGLayer &ofxGPlot::getLayer(const string &id) {
+ofxGLayer& ofxGPlot::getLayer(const string &id) {
 	if (mainLayer.isId(id)) {
 		return mainLayer;
 	}
 
-	for (ofxGLayer layer : layerList) {
+	for (ofxGLayer& layer : layerList) {
 		if (layer.isId(id)) {
 			return layer;
 		}
@@ -1007,11 +1007,11 @@ vector<ofxGPoint> ofxGPlot::getPoints(const string &layerId) const {
 	}
 }
 
-vector<ofxGPoint> &ofxGPlot::getPointsRef() {
+const vector<ofxGPoint> &ofxGPlot::getPointsRef() {
 	return mainLayer.getPointsRef();
 }
 
-vector<ofxGPoint> &ofxGPlot::getPointsRef(const string &layerId) {
+const vector<ofxGPoint> &ofxGPlot::getPointsRef(const string &layerId) {
 	return getLayer(layerId).getPointsRef();
 }
 

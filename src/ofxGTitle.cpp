@@ -32,6 +32,9 @@ void ofxGTitle::draw() const {
 	case GRAFICA_RIGHT_ALIGN:
 		font.drawString(text, plotPos - bounds.width, -offset - dim[1]);
 		break;
+	default:
+		font.drawString(text, plotPos - bounds.width / 2, -offset - dim[1]);
+		break;
 	}
 
 	ofPopStyle();

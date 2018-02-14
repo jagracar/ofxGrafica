@@ -21,8 +21,8 @@ public:
 	void removeLayer(const string &id);
 	array<float, 2> getPlotPosAt(float xScreen, float yScreen) const;
 	array<float, 2> getScreenPosAtValue(float xValue, float yValue) const;
-	ofxGPoint getPointAt(float xScreen, float yScreen) const;
-	ofxGPoint getPointAt(float xScreen, float yScreen, const string &layerId) const;
+	const ofxGPoint* getPointAt(float xScreen, float yScreen) const;
+	const ofxGPoint* getPointAt(float xScreen, float yScreen, const string &layerId) const;
 	void addPointAt(float xScreen, float yScreen);
 	void addPointAt(float xScreen, float yScreen, const string &layerId);
 	void removePointAt(float xScreen, float yScreen);
@@ -142,7 +142,7 @@ public:
 	void setLineColor(const ofColor &lineColor);
 	void setLineWidth(float lineWidth);
 	void setHistBasePoint(const ofxGPoint &basePoint);
-	void setHistType(int histType);
+	void setHistType(ofxGHistogramType histType);
 	void setHistVisible(bool visible);
 	void setDrawHistLabels(bool drawHistLabels);
 	void setLabelBgColor(const ofColor &labelBgColor);
@@ -175,19 +175,19 @@ public:
 	bool getYLog() const;
 	bool getInvertedXScale();
 	bool getInvertedYScale();
-	ofxGLayer &getMainLayer();
-	ofxGLayer &getLayer(const string &id);
-	ofxGAxis &getXAxis();
-	ofxGAxis &getTopAxis();
-	ofxGAxis &getYAxis();
-	ofxGAxis &getRightAxis();
-	ofxGTitle &getTitle();
+	ofxGLayer& getMainLayer();
+	ofxGLayer& getLayer(const string &id);
+	ofxGAxis& getXAxis();
+	ofxGAxis& getTopAxis();
+	ofxGAxis& getYAxis();
+	ofxGAxis& getRightAxis();
+	ofxGTitle& getTitle();
 	vector<ofxGPoint> getPoints() const;
 	vector<ofxGPoint> getPoints(const string &layerId) const;
-	vector<ofxGPoint> &getPointsRef();
-	vector<ofxGPoint> &getPointsRef(const string &layerId);
-	ofxGHistogram &getHistogram();
-	ofxGHistogram &getHistogram(const string &layerId);
+	const vector<ofxGPoint>& getPointsRef();
+	const vector<ofxGPoint>& getPointsRef(const string &layerId);
+	ofxGHistogram& getHistogram();
+	ofxGHistogram& getHistogram(const string &layerId);
 
 protected:
 

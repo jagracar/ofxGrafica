@@ -236,7 +236,7 @@ void ofxGHistogram::setPlotPoints(const vector<ofxGPoint>& newPlotPoints) {
 	updateArrays();
 }
 
-void ofxGHistogram::setPlotPoint(int index, const ofxGPoint& newPlotPoint) {
+void ofxGHistogram::setPlotPoint(vector<ofxGPoint>::size_type index, const ofxGPoint& newPlotPoint) {
 	plotPoints[index] = newPlotPoint;
 	updateArrays();
 }
@@ -246,7 +246,7 @@ void ofxGHistogram::addPlotPoint(const ofxGPoint& newPlotPoint) {
 	updateArrays();
 }
 
-void ofxGHistogram::addPlotPoint(int index, ofxGPoint& newPlotPoint) {
+void ofxGHistogram::addPlotPoint(vector<ofxGPoint>::size_type index, ofxGPoint& newPlotPoint) {
 	plotPoints.insert(plotPoints.begin() + index, newPlotPoint);
 	updateArrays();
 }
@@ -256,7 +256,7 @@ void ofxGHistogram::addPlotPoints(const vector<ofxGPoint>& newPlotPoints) {
 	updateArrays();
 }
 
-void ofxGHistogram::removePlotPoint(int index) {
+void ofxGHistogram::removePlotPoint(vector<ofxGPoint>::size_type index) {
 	plotPoints.erase(plotPoints.begin() + index);
 	updateArrays();
 }

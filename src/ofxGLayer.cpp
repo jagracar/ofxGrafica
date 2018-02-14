@@ -1,8 +1,11 @@
 #include "ofxGLayer.h"
+#include "ofxGConstants.h"
+#include "ofxGPoint.h"
+#include "ofxGHistogram.h"
 #include "ofMain.h"
 
-ofxGLayer::ofxGLayer(const string &_id, const array<float, 2> &_dim, const array<float, 2> &_xLim,
-		const array<float, 2> &_yLim, bool _xLog, bool _yLog) :
+ofxGLayer::ofxGLayer(const string& _id, const array<float, 2>& _dim, const array<float, 2>& _xLim,
+		const array<float, 2>& _yLim, bool _xLog, bool _yLog) :
 		id(_id), dim(_dim), xLim(_xLim), yLim(_yLim), xLog(_xLog), yLog(_yLog) {
 	// Do some sanity checks
 	if ((xLog && (xLim[0] <= 0 || xLim[1] <= 0)) || (yLog && (yLim[0] <= 0 || yLim[1] <= 0))) {
@@ -10,27 +13,29 @@ ofxGLayer::ofxGLayer(const string &_id, const array<float, 2> &_dim, const array
 	}
 
 	// Points properties
-	pointColors.push_back(ofColor(255, 0, 0, 150));
-	pointSizes.push_back(3.5);
+	pointColors = {ofColor(255, 0, 0, 150)};
+	pointSizes = {3.5};
 
 	// Line properties
 	lineColor = ofColor(0, 150);
 	lineWidth = 1;
 
 	// Histogram properties
-	//hist = nullptr;
 	histBasePoint = ofxGPoint(0, 0);
+	histIsActive = false;
 
 	// Labels properties
 	labelBgColor = ofColor(255, 200);
 	labelSeparation = {7, 7};
+
+	// Font properties
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
 	fontSize = 11;
 	font.load(fontName, fontSize);
 }
 
-bool ofxGLayer::isId(const string &someId) const {
+bool ofxGLayer::isId(const string& someId) const {
 	return id == someId;
 }
 
@@ -54,49 +59,48 @@ array<float, 2> ofxGLayer::valueToPlot(float x, float y) const {
 	return {valueToXPlot(x), valueToYPlot(y)};
 }
 
-ofxGPoint ofxGLayer::valueToPlot(const ofxGPoint &point) const {
+ofxGPoint ofxGLayer::valueToPlot(const ofxGPoint& point) const {
 	return ofxGPoint(valueToXPlot(point.getX()), valueToYPlot(point.getY()), point.getLabel());
 }
 
-vector<ofxGPoint> &ofxGLayer::valueToPlot(const vector<ofxGPoint> &pts) const {
+vector<ofxGPoint> ofxGLayer::valueToPlot(const vector<ofxGPoint>& pts) const {
 	vector<ofxGPoint> plotPts;
 
-	// Go case by case. More code, but it's faster
 	if (xLog && yLog) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
-		for (ofxGPoint p : pts) {
+		for (const ofxGPoint& p : pts) {
 			float xPlot = log10(p.getX() / xLim[0]) * xScalingFactor;
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
-			plotPts.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else if (xLog) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
-		for (ofxGPoint p : pts) {
+		for (const ofxGPoint& p : pts) {
 			float xPlot = log10(p.getX() / xLim[0]) * xScalingFactor;
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
-			plotPts.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else if (yLog) {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
-		for (ofxGPoint p : pts) {
+		for (const ofxGPoint& p : pts) {
 			float xPlot = (p.getX() - xLim[0]) * xScalingFactor;
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
-			plotPts.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
-		for (ofxGPoint p : pts) {
+		for (const ofxGPoint& p : pts) {
 			float xPlot = (p.getX() - xLim[0]) * xScalingFactor;
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
-			plotPts.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	}
 
@@ -106,49 +110,48 @@ vector<ofxGPoint> &ofxGLayer::valueToPlot(const vector<ofxGPoint> &pts) const {
 void ofxGLayer::updatePlotPoints() {
 	plotPoints.clear();
 
-	// Go case by case. More code, but it should be faster
 	if (xLog && yLog) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
-		for (ofxGPoint p : points) {
+		for (const ofxGPoint& p : points) {
 			float xPlot = log10(p.getX() / xLim[0]) * xScalingFactor;
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
-			plotPoints.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else if (xLog) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
-		for (ofxGPoint p : points) {
+		for (const ofxGPoint& p : points) {
 			float xPlot = log10(p.getX() / xLim[0]) * xScalingFactor;
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
-			plotPoints.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else if (yLog) {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
-		for (ofxGPoint p : points) {
+		for (const ofxGPoint& p : points) {
 			float xPlot = (p.getX() - xLim[0]) * xScalingFactor;
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
-			plotPoints.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	} else {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
-		for (ofxGPoint p : points) {
+		for (const ofxGPoint& p : points) {
 			float xPlot = (p.getX() - xLim[0]) * xScalingFactor;
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
-			plotPoints.push_back(ofxGPoint(xPlot, yPlot, p.getLabel()));
+			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
 	}
 }
 
 float ofxGLayer::xPlotToValue(float xPlot) const {
 	if (xLog) {
-		return exp(log(xLim[0]) + log(xLim[1] / xLim[0]) * xPlot / dim[0]);
+		return exp(log10(xLim[0]) + log10(xLim[1] / xLim[0]) * xPlot / dim[0]);
 	} else {
 		return xLim[0] + (xLim[1] - xLim[0]) * xPlot / dim[0];
 	}
@@ -156,7 +159,7 @@ float ofxGLayer::xPlotToValue(float xPlot) const {
 
 float ofxGLayer::yPlotToValue(float yPlot) const {
 	if (yLog) {
-		return exp(log(yLim[0]) - log(yLim[1] / yLim[0]) * yPlot / dim[1]);
+		return exp(log10(yLim[0]) - log10(yLim[1] / yLim[0]) * yPlot / dim[1]);
 	} else {
 		return yLim[0] - (yLim[1] - yLim[0]) * yPlot / dim[1];
 	}
@@ -170,14 +173,14 @@ bool ofxGLayer::isInside(float xPlot, float yPlot) const {
 	return (xPlot >= 0) && (xPlot <= dim[0]) && (-yPlot >= 0) && (-yPlot <= dim[1]);
 }
 
-bool ofxGLayer::isInside(const ofxGPoint &plotPoint) const {
+bool ofxGLayer::isInside(const ofxGPoint& plotPoint) const {
 	return plotPoint.isValid() ? isInside(plotPoint.getX(), plotPoint.getY()) : false;
 }
 
-vector<bool> &ofxGLayer::isInside(const vector<ofxGPoint> &plotPts) const {
+vector<bool> ofxGLayer::isInside(const vector<ofxGPoint>& plotPts) const {
 	vector<bool> pointsInside;
 
-	for (ofxGPoint p : plotPts) {
+	for (const ofxGPoint& p : plotPts) {
 		pointsInside.push_back(isInside(p));
 	}
 
@@ -185,28 +188,24 @@ vector<bool> &ofxGLayer::isInside(const vector<ofxGPoint> &plotPts) const {
 }
 
 void ofxGLayer::updateInsideList() {
-	// Clear the list first, because the size could have changed
 	inside.clear();
 
-	// Refill the list
-	for (ofxGPoint p : plotPoints) {
+	for (const ofxGPoint& p : plotPoints) {
 		inside.push_back(isInside(p));
 	}
 }
 
-int ofxGLayer::getPointIndexAtPlotPos(float xPlot, float yPlot) const {
-	int pointIndex = -1;
+vector<ofxGPoint>::size_type ofxGLayer::getPointIndexAtPlotPos(float xPlot, float yPlot) const {
+	vector<ofxGPoint>::size_type pointIndex = plotPoints.size();
 
 	if (isInside(xPlot, yPlot)) {
-		int nPoints = plotPoints.size();
 		float minDistSq = 1000;
-		int nSizes = pointSizes.size();
 
-		for (int i = 0; i < nPoints; ++i) {
+		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size(); ++i) {
 			if (inside[i]) {
 				float distSq = pow(plotPoints[i].getX() - xPlot, 2) + pow(plotPoints[i].getY() - yPlot, 2);
 
-				if (distSq < max(pow(pointSizes[i % nSizes] / 2, 2), 25.)) {
+				if (distSq < max(pow(pointSizes[i % pointSizes.size()] / 2, 2), 25.0)) {
 					if (distSq < minDistSq) {
 						minDistSq = distSq;
 						pointIndex = i;
@@ -219,84 +218,13 @@ int ofxGLayer::getPointIndexAtPlotPos(float xPlot, float yPlot) const {
 	return pointIndex;
 }
 
-ofxGPoint ofxGLayer::getPointAtPlotPos(float xPlot, float yPlot) const {
-	int pointIndex = getPointIndexAtPlotPos(xPlot, yPlot);
+const ofxGPoint* ofxGLayer::getPointAtPlotPos(float xPlot, float yPlot) const {
+	vector<ofxGPoint>::size_type pointIndex = getPointIndexAtPlotPos(xPlot, yPlot);
 
-	//return (pointIndex >= 0) ? points[pointIndex] : nullptr;
-
-	return ofxGPoint();
+	return (pointIndex < points.size()) ? &points[pointIndex] : nullptr;
 }
 
-void ofxGLayer::drawPoints() const {
-	int nPoints = plotPoints.size();
-	int nColors = pointColors.size();
-	int nSizes = pointSizes.size();
-
-	ofPushStyle();
-	ofFill();
-
-	if (nColors == 1 && nSizes == 1) {
-		ofSetColor(pointColors[0]);
-
-		for (int i = 0; i < nPoints; i++) {
-			if (inside[i]) {
-				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[0]);
-			}
-		}
-	} else if (nColors == 1) {
-		ofSetColor(pointColors[0]);
-
-		for (int i = 0; i < nPoints; i++) {
-			if (inside[i]) {
-				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[i % nSizes]);
-			}
-		}
-	} else if (nSizes == 1) {
-		for (int i = 0; i < nPoints; i++) {
-			if (inside[i]) {
-				ofSetColor(pointColors[i % nColors]);
-				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[0]);
-			}
-		}
-	} else {
-		for (int i = 0; i < nPoints; i++) {
-			if (inside[i]) {
-				ofSetColor(pointColors[i % nColors]);
-				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[i % nSizes]);
-			}
-		}
-	}
-
-	ofPopStyle();
-}
-
-void ofxGLayer::drawLines() {
-	ofPushStyle();
-	ofSetColor(lineColor);
-	ofSetLineWidth(lineWidth);
-
-	for (int i = 0; i < plotPoints.size() - 1; ++i) {
-		if (inside[i] && inside[i + 1]) {
-			ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
-		} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
-			// At least one of the points is outside the inner region.
-			// Obtain the valid line box intersections
-			int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
-
-			if (inside[i]) {
-				ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), cuts[0][0], cuts[0][1]);
-			} else if (inside[i + 1]) {
-				ofDrawLine(cuts[0][0], cuts[0][1], plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
-			} else if (nCuts >= 2) {
-				ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
-			}
-		}
-	}
-
-	ofPopStyle();
-}
-
-int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoint &plotPoint2) {
+int ofxGLayer::obtainBoxIntersections(const ofxGPoint& plotPoint1, const ofxGPoint& plotPoint2) {
 	int nCuts = 0;
 
 	if (plotPoint1.isValid() && plotPoint2.isValid()) {
@@ -307,8 +235,7 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 		bool inside1 = isInside(x1, y1);
 		bool inside2 = isInside(x2, y2);
 
-		// Check if the line between the two points could cut the box
-		// borders
+		// Check if the line between the two points could cut the box borders
 		bool dontCut = (inside1 && inside2) || (x1 < 0 && x2 < 0) || (x1 > dim[0] && x2 > dim[0])
 				|| (-y1 < 0 && -y2 < 0) || (-y1 > dim[1] && -y2 > dim[1]);
 
@@ -330,8 +257,7 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 				cuts[1][0] = dim[0];
 				cuts[1][1] = y1;
 			} else {
-				// Obtain the straight line (y = yCut + slope*x) that
-				// crosses the two points
+				// Obtain the straight line (y = yCut + slope*x) that crosses the two points
 				float slope = deltaY / deltaX;
 				float yCut = y1 - slope * x1;
 
@@ -347,15 +273,14 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 				cuts[3][1] = yCut + slope * dim[0];
 			}
 
-			// Select only the cuts that fall inside the box and are located
-			// between the two points
+			// Select only the cuts that fall inside the box and are located between the two points
 			nCuts = getValidCuts(cuts, nCuts, plotPoint1, plotPoint2);
 
 			// Make sure we have the correct number of cuts
 			if (inside1 || inside2) {
 				// One of the points is inside. We should have one cut only
 				if (nCuts != 1) {
-					ofxGPoint pointInside = (inside1) ? plotPoint1 : plotPoint2;
+					const ofxGPoint& pointInside = (inside1) ? plotPoint1 : plotPoint2;
 
 					// If too many cuts
 					if (nCuts > 1) {
@@ -375,8 +300,7 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 						}
 					}
 
-					// If the cut is missing, then it must be equal to the
-					// point inside
+					// If the cut is missing, then it must be equal to the point inside
 					if (nCuts == 0) {
 						nCuts = 1;
 						cuts[0][0] = pointInside.getX();
@@ -384,8 +308,7 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 					}
 				}
 			} else {
-				// Both points are outside. We should have either two cuts
-				// or none
+				// Both points are outside. We should have either two cuts or none
 				if (nCuts > 2) {
 					nCuts = removeDuplicatedCuts(cuts, nCuts, 0);
 
@@ -395,8 +318,7 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 					}
 				}
 
-				// If we have two cuts, order them (the closest to the first
-				// point goes first)
+				// If we have two cuts, order them (the closest to the first point goes first)
 				if (nCuts == 2) {
 					if ((pow(cuts[0][0] - x1, 2) + pow(cuts[0][1] - y1, 2))
 							> (pow(cuts[1][0] - x1, 2) + pow(cuts[1][1] - y1, 2))) {
@@ -429,8 +351,8 @@ int ofxGLayer::obtainBoxIntersections(const ofxGPoint &plotPoint1, const ofxGPoi
 	return nCuts;
 }
 
-int ofxGLayer::getValidCuts(array<array<float, 2>, 4> &cuts, int nCuts, const ofxGPoint &plotPoint1,
-		const ofxGPoint &plotPoint2) {
+int ofxGLayer::getValidCuts(array<array<float, 2>, 4>& cuts, int nCuts, const ofxGPoint& plotPoint1,
+		const ofxGPoint& plotPoint2) {
 	float x1 = plotPoint1.getX();
 	float y1 = plotPoint1.getY();
 	float x2 = plotPoint2.getX();
@@ -455,7 +377,7 @@ int ofxGLayer::getValidCuts(array<array<float, 2>, 4> &cuts, int nCuts, const of
 	return counter;
 }
 
-int ofxGLayer::removeDuplicatedCuts(array<array<float, 2>, 4> &cuts, int nCuts, float tolerance) {
+int ofxGLayer::removeDuplicatedCuts(array<array<float, 2>, 4>& cuts, int nCuts, float tolerance) {
 	int counter = 0;
 
 	for (int i = 0; i < nCuts; ++i) {
@@ -478,7 +400,7 @@ int ofxGLayer::removeDuplicatedCuts(array<array<float, 2>, 4> &cuts, int nCuts, 
 	return counter;
 }
 
-int ofxGLayer::removePointFromCuts(array<array<float, 2>, 4> &cuts, int nCuts, const ofxGPoint &plotPoint,
+int ofxGLayer::removePointFromCuts(array<array<float, 2>, 4>& cuts, int nCuts, const ofxGPoint& plotPoint,
 		float tolerance) {
 	float x = plotPoint.getX();
 	float y = plotPoint.getY();
@@ -495,110 +417,533 @@ int ofxGLayer::removePointFromCuts(array<array<float, 2>, 4> &cuts, int nCuts, c
 	return counter;
 }
 
-void ofxGLayer::setDim(float xDim, float yDim) {
-	if (xDim > 0 && yDim > 0) {
-		dim = {xDim, yDim};
-		updatePlotPoints();
+void ofxGLayer::startHistogram(ofxGHistogramType histType) {
+	hist = ofxGHistogram(histType, dim, plotPoints);
+	histIsActive = True;
+}
 
-		//if (hist != null) {
-		//	hist.setDim(xDim, yDim);
-		//	hist.setPlotPoints(plotPoints);
-		//}
+void ofxGLayer::stopHistogram() {
+	histIsActive = false;
+}
+
+void ofxGLayer::drawPoints() const {
+	int nPoints = plotPoints.size();
+	int nColors = pointColors.size();
+	int nSizes = pointSizes.size();
+
+	ofPushStyle();
+	ofFill();
+
+	if (nColors == 1 && nSizes == 1) {
+		ofSetColor(pointColors[0]);
+
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[0]);
+			}
+		}
+	} else if (nColors == 1) {
+		ofSetColor(pointColors[0]);
+
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[i % nSizes]);
+			}
+		}
+	} else if (nSizes == 1) {
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				ofSetColor(pointColors[i % nColors]);
+				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[0]);
+			}
+		}
+	} else {
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				ofSetColor(pointColors[i % nColors]);
+				ofDrawCircle(plotPoints[i].getX(), plotPoints[i].getY(), pointSizes[i % nSizes]);
+			}
+		}
+	}
+
+	ofPopStyle();
+}
+
+void ofxGLayer::drawPoints(ofPath& pointShape) const {
+	int nPoints = plotPoints.size();
+	int nColors = pointColors.size();
+
+	if (nColors == 1) {
+		pointShape.setColor(pointColors[0]);
+
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				pointShape.draw(plotPoints[i].getX(), plotPoints[i].getY());
+			}
+		}
+	} else {
+		for (int i = 0; i < nPoints; ++i) {
+			if (inside[i]) {
+				pointShape.setColor(pointColors[i % nColors]);
+				pointShape.draw(plotPoints[i].getX(), plotPoints[i].getY());
+			}
+		}
 	}
 }
 
-void ofxGLayer::setDim(const array<float, 2> &newDim) {
+void ofxGLayer::drawPoints(const ofImage& pointImg) const {
+	int nPoints = plotPoints.size();
+	int imgWidth = pointImg.getWidth();
+	int imgHeight = pointImg.getHeight();
+
+	for (int i = 0; i < nPoints; ++i) {
+		if (inside[i]) {
+			pointImg.draw(plotPoints[i].getX() - imgWidth / 2, plotPoints[i].getY() + imgHeight / 2);
+		}
+	}
+}
+
+void ofxGLayer::drawPoint(const ofxGPoint& point, const ofColor& pointColor, float pointSize) const {
+	float xPlot = valueToXPlot(point.getX());
+	float yPlot = valueToYPlot(point.getY());
+
+	if (isInside(xPlot, yPlot)) {
+		ofPushStyle();
+		ofFill();
+		ofSetColor(pointColor);
+		ofDrawCircle(xPlot, yPlot, pointSize);
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::drawPoint(const ofxGPoint& point) const {
+	drawPoint(point, pointColors[0], pointSizes[0]);
+}
+
+void ofxGLayer::drawPoint(const ofxGPoint& point, const ofPath& pointShape) const {
+	float xPlot = valueToXPlot(point.getX());
+	float yPlot = valueToYPlot(point.getY());
+
+	if (isInside(xPlot, yPlot)) {
+		pointShape.draw(xPlot, yPlot);
+	}
+}
+
+void ofxGLayer::drawPoint(const ofxGPoint& point, ofPath& pointShape, const ofColor& pointColor) const {
+	float xPlot = valueToXPlot(point.getX());
+	float yPlot = valueToYPlot(point.getY());
+
+	if (isInside(xPlot, yPlot)) {
+		pointShape.setColor(pointColor);
+		pointShape.draw(xPlot, yPlot);
+	}
+}
+
+void ofxGLayer::drawPoint(const ofxGPoint& point, const ofImage& pointImg) const {
+	float xPlot = valueToXPlot(point.getX());
+	float yPlot = valueToYPlot(point.getY());
+
+	if (isInside(xPlot, yPlot)) {
+		pointImg.draw(xPlot - pointImg.getWidth() / 2, yPlot + pointImg.getHeight() / 2);
+	}
+}
+
+void ofxGLayer::drawLines() {
+	ofPushStyle();
+	ofSetColor(lineColor);
+	ofSetLineWidth(lineWidth);
+
+	for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
+		if (inside[i] && inside[i + 1]) {
+			ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
+		} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
+			// At least one of the points is outside the inner region.
+			// Obtain the valid line box intersections
+			int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
+
+			if (inside[i]) {
+				ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), cuts[0][0], cuts[0][1]);
+			} else if (inside[i + 1]) {
+				ofDrawLine(cuts[0][0], cuts[0][1], plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
+			} else if (nCuts >= 2) {
+				ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
+			}
+		}
+	}
+
+	ofPopStyle();
+}
+
+void ofxGLayer::drawLine(const ofxGPoint& point1, const ofxGPoint& point2, const ofColor& lc, float lw) {
+	ofxGPoint plotPoint1 = valueToPlot(point1);
+	ofxGPoint plotPoint2 = valueToPlot(point2);
+
+	if (plotPoint1.isValid() && plotPoint2.isValid()) {
+		bool inside1 = isInside(plotPoint1);
+		bool inside2 = isInside(plotPoint2);
+
+		ofPushStyle();
+		ofSetColor(lc);
+		ofSetLineWidth(lw);
+
+		if (inside1 && inside2) {
+			ofDrawLine(plotPoint1.getX(), plotPoint1.getY(), plotPoint2.getX(), plotPoint2.getY());
+		} else {
+			// At least one of the points is outside the inner region. Obtain the valid line box intersections
+			int nCuts = obtainBoxIntersections(plotPoint1, plotPoint2);
+
+			if (inside1) {
+				ofDrawLine(plotPoint1.getX(), plotPoint1.getY(), cuts[0][0], cuts[0][1]);
+			} else if (inside2) {
+				ofDrawLine(cuts[0][0], cuts[0][1], plotPoint2.getX(), plotPoint2.getY());
+			} else if (nCuts >= 2) {
+				ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
+			}
+		}
+
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::drawLine(const ofxGPoint& point1, const ofxGPoint& point2) {
+	drawLine(point1, point2, lineColor, lineWidth);
+}
+
+void ofxGLayer::drawLine(float slope, float yCut, const ofColor& lc, float lw) {
+	if (xLog && yLog) {
+		ofxGPoint point1 = ofxGPoint(xLim[0], pow(10, slope * log10(xLim[0]) + yCut));
+		ofxGPoint point2 = ofxGPoint(xLim[1], pow(10, slope * log10(xLim[1]) + yCut));
+		drawLine(point1, point2, lc, lw);
+	} else if (xLog) {
+		ofxGPoint point1 = ofxGPoint(xLim[0], slope * log10(xLim[0]) + yCut);
+		ofxGPoint point2 = ofxGPoint(xLim[1], slope * log10(xLim[1]) + yCut);
+		drawLine(point1, point2, lc, lw);
+	} else if (yLog) {
+		ofxGPoint point1 = ofxGPoint(xLim[0], pow(10, slope * xLim[0] + yCut));
+		ofxGPoint point2 = ofxGPoint(xLim[1], pow(10, slope * xLim[1] + yCut));
+		drawLine(point1, point2, lc, lw);
+	} else {
+		ofxGPoint point1 = ofxGPoint(xLim[0], slope * xLim[0] + yCut);
+		ofxGPoint point2 = ofxGPoint(xLim[1], slope * xLim[1] + yCut);
+		drawLine(point1, point2, lc, lw);
+	}
+}
+
+void ofxGLayer::drawLine(float slope, float yCut) {
+	drawLine(slope, yCut, lineColor, lineWidth);
+}
+
+void ofxGLayer::drawHorizontalLine(float value, const ofColor& lc, float lw) const {
+	float yPlot = valueToYPlot(value);
+
+	if (isfinite(yPlot) && -yPlot >= 0 && -yPlot <= dim[1]) {
+		ofPushStyle();
+		ofSetColor(lc);
+		ofSetLineWidth(lw);
+		ofDrawLine(0, yPlot, dim[0], yPlot);
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::drawHorizontalLine(float value) const {
+	drawHorizontalLine(value, lineColor, lineWidth);
+}
+
+void ofxGLayer::drawVerticalLine(float value, const ofColor& lc, float lw) const {
+	float xPlot = valueToXPlot(value);
+
+	if (isfinite(xPlot) && xPlot >= 0 && xPlot <= dim[0]) {
+		ofPushStyle();
+		ofSetColor(lc);
+		ofSetLineWidth(lw);
+		ofDrawLine(xPlot, 0, xPlot, -dim[1]);
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::drawVerticalLine(float value) const {
+	drawVerticalLine(value, lineColor, lineWidth);
+}
+
+void ofxGLayer::drawFilledContour(int contourType, float referenceValue) const {
+
+}
+
+//vector<ofxGPoint> ofxGLayer::getHorizontalShape(float referenceValue) {
+//
+//}
+
+//vector<ofxGPoint> ofxGLayer::getVerticalShape(float referenceValue) {
+//
+//}
+
+void ofxGLayer::drawLabel(const ofxGPoint& point) const {
+	float xPlot = valueToXPlot(point.getX());
+	float yPlot = valueToYPlot(point.getY());
+
+	if (isfinite(xPlot) && isfinite(yPlot)) {
+		float xLabelPos = xPlot + labelSeparation[0];
+		float yLabelPos = yPlot - labelSeparation[1];
+		float delta = fontSize / 4;
+
+		ofRectangle bounds = font.getStringBoundingBox(point.getLabel(), 0, 0);
+
+		ofPushStyle();
+		ofFill();
+		ofSetColor(labelBgColor);
+		ofSetRectMode(OF_RECTMODE_CORNER);
+		ofDrawRectangle(xLabelPos - delta, yLabelPos - bounds.height - delta, bounds.width + 2 * delta,
+				bounds.height + 2 * delta);
+		ofSetColor(fontColor);
+		font.drawString(point.getLabel(), xLabelPos, yLabelPos);
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::drawLabelAtPlotPos(float xPlot, float yPlot) const {
+	const ofxGPoint* pointPtr = getPointAtPlotPos(xPlot, yPlot);
+
+	if (pointPtr != nullptr) {
+		drawLabel(*pointPtr);
+	}
+}
+
+void ofxGLayer::drawHistogram() const {
+	if (histIsActive) {
+		hist.draw(valueToPlot(histBasePoint));
+	}
+}
+
+void ofxGLayer::drawPolygon(const vector<ofxGPoint>& polygonPoints, const ofColor& polygonColor) {
+	if (polygonPoints.size() > 2) {
+		vector<ofxGPoint> plotPolygonPoints = valueToPlot(polygonPoints);
+
+		// Remove the polygon invalid points
+		vector<ofxGPoint> cleanPoints;
+
+		for (const ofxGPoint& p : plotPolygonPoints) {
+			if (p.isValid()) {
+				cleanPoints.push_back(p);
+			}
+		}
+
+		// Create a temporal array with the points inside the plotting area and the valid box cuts
+		vector<ofxGPoint> tmp;
+		int nPoints = cleanPoints.size();
+
+		for (int i = 0; i < nPoints; ++i) {
+			if (isInside(cleanPoints[i])) {
+				tmp.emplace_back(cleanPoints[i].getX(), cleanPoints[i].getY(), "normal point");
+			}
+
+			// Obtain the cuts with the next point
+			int nextIndex = (i + 1 < nPoints) ? i + 1 : 0;
+			int nCuts = obtainBoxIntersections(cleanPoints[i], cleanPoints[nextIndex]);
+
+			if (nCuts == 1) {
+				tmp.emplace_back(cuts[0][0], cuts[0][1], "single cut");
+			} else if (nCuts > 1) {
+				tmp.emplace_back(cuts[0][0], cuts[0][1], "double cut");
+				tmp.emplace_back(cuts[1][0], cuts[1][1], "double cut");
+			}
+		}
+
+		// Final version of the polygon
+		nPoints = tmp.size();
+		vector<ofxGPoint> croppedPoly;
+
+		for (int i = 0; i < nPoints; ++i) {
+			// Add the point
+			croppedPoly.push_back(tmp[i]);
+
+			// Add new points in case we have two consecutive cuts, one of them is single, and they are in
+			// consecutive axes
+			int nextIndex = (i + 1 < nPoints) ? i + 1 : 0;
+			string label = tmp[i].getLabel();
+			string nextLabel = tmp[nextIndex].getLabel();
+
+			bool cond = (label == "single cut" && nextLabel == "single cut")
+					|| (label == "single cut" && nextLabel == "double cut")
+					|| (label == "double cut" && nextLabel == "single cut");
+
+			if (cond) {
+				float x1 = tmp[i].getX();
+				float y1 = tmp[i].getY();
+				float x2 = tmp[nextIndex].getX();
+				float y2 = tmp[nextIndex].getY();
+				float deltaX = abs(x2 - x1);
+				float deltaY = abs(y2 - y1);
+
+				// Check that they come from consecutive axes
+				if (deltaX > 0 && deltaY > 0 && deltaX != dim[0] && deltaY != dim[1]) {
+					float x = (x1 == 0 || x1 == dim[0]) ? x1 : x2;
+					float y = (y1 == 0 || y1 == -dim[1]) ? y1 : y2;
+					croppedPoly.emplace_back(x, y, "special cut");
+				}
+			}
+		}
+
+		// Draw the cropped polygon
+		if (croppedPoly.size() > 2) {
+			ofPushStyle();
+			ofFill();
+			ofSetColor(polygonColor);
+
+			ofBeginShape();
+
+			for (const ofxGPoint& p : croppedPoly) {
+				ofVertex(p.getX(), p.getY());
+			}
+
+			ofEndShape(true);
+
+			ofPopStyle();
+		}
+	}
+}
+
+void ofxGLayer::drawAnnotation(const string& text, float x, float y, ofxGTextAlignment verAlign) const {
+	float xPlot = valueToXPlot(x);
+	float yPlot = valueToYPlot(y);
+
+	if (isfinite(xPlot) && isfinite(yPlot) && isInside(xPlot, yPlot)) {
+		ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
+
+		ofPushStyle();
+		ofSetColor(fontColor);
+
+		switch (verAlign) {
+		case GRAFICA_CENTER_ALIGN:
+			font.drawString(text, xPlot, yPlot - bounds.height / 2);
+			break;
+		case GRAFICA_TOP_ALIGN:
+			font.drawString(text, xPlot, yPlot + bounds.height / 2);
+			break;
+		case GRAFICA_BOTTOM_ALIGN:
+			font.drawString(text, xPlot, yPlot);
+			break;
+		default:
+			font.drawString(text, xPlot, yPlot);
+			break;
+		}
+
+		ofPopStyle();
+	}
+}
+
+void ofxGLayer::setDim(float xDim, float yDim) {
+	if (xDim <= 0 || yDim <= 0) {
+		throw invalid_argument("The dimensions should be larger than zero.");
+	}
+
+	dim = {xDim, yDim};
+	updatePlotPoints();
+
+	if (histIsActive) {
+		hist.setDim(xDim, yDim);
+		hist.setPlotPoints(plotPoints);
+	}
+}
+
+void ofxGLayer::setDim(const array<float, 2>& newDim) {
 	setDim(newDim[0], newDim[1]);
 }
 
 void ofxGLayer::setXLim(float xMin, float xMax) {
-	if (xMin != xMax && isfinite(xMin) && isfinite(xMax)) {
-		// Make sure the new limits makes sense
-		if (xLog && (xMin <= 0 || xMax <= 0)) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		}
+// Check that the new limit makes sense
+	if (xMin == xMax) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (!isfinite(xMin) || !isfinite(xMax)) {
+		throw invalid_argument("The limits need to be finite numbers.");
+	} else if (xLog && (xMin <= 0 || xMax <= 0)) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
+	}
 
-		xLim = {xMin, xMax};
-		updatePlotPoints();
-		updateInsideList();
+	xLim = {xMin, xMax};
+	updatePlotPoints();
+	updateInsideList();
 
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
 	}
 }
 
-void ofxGLayer::setXLim(const array<float, 2> &newXLim) {
+void ofxGLayer::setXLim(const array<float, 2>& newXLim) {
 	setXLim(newXLim[0], newXLim[1]);
 }
 
 void ofxGLayer::setYLim(float yMin, float yMax) {
-	if (yMin != yMax && isfinite(yMin) && isfinite(yMax)) {
-		// Make sure the new limits makes sense
-		if (yLog && (yMin <= 0 || yMax <= 0)) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		}
+// Check that the new limit makes sense
+	if (yMin == yMax) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (!isfinite(yMin) || !isfinite(yMax)) {
+		throw invalid_argument("The limits need to be finite numbers.");
+	} else if (yLog && (yMin <= 0 || yMax <= 0)) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
+	}
 
-		yLim = {yMin, yMax};
-		updatePlotPoints();
-		updateInsideList();
+	yLim = {yMin, yMax};
+	updatePlotPoints();
+	updateInsideList();
 
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
-
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
 	}
 }
 
-void ofxGLayer::setYLim(const array<float, 2> &newYLim) {
+void ofxGLayer::setYLim(const array<float, 2>& newYLim) {
 	setYLim(newYLim[0], newYLim[1]);
 }
 
 void ofxGLayer::setXYLim(float xMin, float xMax, float yMin, float yMax) {
-	if (xMin != xMax && yMin != yMax && isfinite(xMin) && isfinite(xMax) && isfinite(yMin) && isfinite(yMax)) {
-		// Make sure the new limits make sense
-		if ((xLog && (xMin <= 0 || xMax <= 0)) || (yLog && (yMin <= 0 || yMax <= 0))) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		}
+// Check that the new limit makes sense
+	if (xMin == xMax || yMin == yMax) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (!isfinite(xMin) || !isfinite(xMax) || !isfinite(yMin) || !isfinite(yMax)) {
+		throw invalid_argument("The limits need to be finite numbers.");
+	} else if ((xLog && (xMin <= 0 || xMax <= 0)) || (yLog && (yMin <= 0 || yMax <= 0))) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
+	}
 
-		xLim = {xMin, xMax};
-		yLim = {yMin, yMax};
+	xLim = {xMin, xMax};
+	yLim = {yMin, yMax};
 
-		updatePlotPoints();
-		updateInsideList();
+	updatePlotPoints();
+	updateInsideList();
 
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
 	}
 }
-void ofxGLayer::setXYLim(const array<float, 2> &newXLim, const array<float, 2> &newYLim) {
+
+void ofxGLayer::setXYLim(const array<float, 2>& newXLim, const array<float, 2>& newYLim) {
 	setXYLim(newXLim[0], newXLim[1], newYLim[0], newYLim[1]);
 }
 
 void ofxGLayer::setLimAndLog(float xMin, float xMax, float yMin, float yMax, bool newXLog, bool newYLog) {
-	if (xMin != xMax && yMin != yMax && isfinite(xMin) && isfinite(xMax) && isfinite(yMin) && isfinite(yMax)) {
-		// Make sure the new limits make sense
+// Check that the new limit makes sense
+	if (xMin == xMax || yMin == yMax) {
+		throw invalid_argument("The limit range cannot be zero.");
+	} else if (!isfinite(xMin) || !isfinite(xMax) || !isfinite(yMin) || !isfinite(yMax)) {
+		throw invalid_argument("The limits need to be finite numbers.");
+	} else if ((newXLog && (xMin <= 0 || xMax <= 0)) || (newYLog && (yMin <= 0 || yMax <= 0))) {
+		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
+	}
 
-		if ((newXLog && (xMin <= 0 || xMax <= 0)) || (newYLog && (yMin <= 0 || yMax <= 0))) {
-			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
-		}
+	xLog = newXLog;
+	yLog = newYLog;
+	xLim = {xMin, xMax};
+	yLim = {yMin, yMax};
 
-		xLog = newXLog;
-		yLog = newYLog;
-		xLim = {xMin, xMax};
-		yLim = {yMin, yMax};
+	updatePlotPoints();
+	updateInsideList();
 
-		updatePlotPoints();
-		updateInsideList();
-
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
 	}
 }
 
-void ofxGLayer::setLimAndLog(const array<float, 2> &newXLim, const array<float, 2> &newYLim, bool newXLog,
+void ofxGLayer::setLimAndLog(const array<float, 2>& newXLim, const array<float, 2>& newYLim, bool newXLog,
 		bool newYLog) {
 	setLimAndLog(newXLim[0], newXLim[1], newYLim[0], newYLim[1], newXLog, newYLog);
 }
@@ -613,9 +958,9 @@ void ofxGLayer::setXLog(bool newXLog) {
 		updatePlotPoints();
 		updateInsideList();
 
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
+		if (histIsActive) {
+			hist.setPlotPoints(plotPoints);
+		}
 	}
 }
 
@@ -629,177 +974,219 @@ void ofxGLayer::setYLog(bool newYLog) {
 		updatePlotPoints();
 		updateInsideList();
 
-		//if (hist != null) {
-		//	hist.setPlotPoints(plotPoints);
-		//}
+		if (histIsActive) {
+			hist.setPlotPoints(plotPoints);
+		}
 	}
 }
 
-void ofxGLayer::setPoints(const vector<ofxGPoint> &newPoints) {
+void ofxGLayer::setPoints(const vector<ofxGPoint>& newPoints) {
 	points = newPoints;
 	updatePlotPoints();
 	updateInsideList();
 
-	//if (hist != null) {
-	//	hist.setPlotPoints(plotPoints);
-	//}
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
+	}
 }
 
-void ofxGLayer::setPoint(int index, float x, float y, const string &label) {
+void ofxGLayer::setPoint(vector<ofxGPoint>::size_type index, float x, float y, const string& label) {
+	points[index].set(x, y, label);
+	plotPoints[index].set(valueToXPlot(x), valueToYPlot(y), label);
+	inside[index] = isInside(plotPoints[index]);
 
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
+	}
 }
 
-void ofxGLayer::setPoint(int index, float x, float y) {
-
+void ofxGLayer::setPoint(vector<ofxGPoint>::size_type index, float x, float y) {
+	setPoint(index, x, y, points[index].getLabel());
 }
 
-void ofxGLayer::setPoint(int index, const ofxGPoint &newPoint) {
-
+void ofxGLayer::setPoint(vector<ofxGPoint>::size_type index, const ofxGPoint& newPoint) {
+	setPoint(index, newPoint.getX(), newPoint.getY(), newPoint.getLabel());
 }
 
-void ofxGLayer::addPoint(float x, float y, const string &label) {
-	points.push_back(ofxGPoint(x, y, label));
-	plotPoints.push_back(ofxGPoint(valueToXPlot(x), valueToYPlot(y), label));
+void ofxGLayer::addPoint(float x, float y, const string& label) {
+	points.emplace_back(x, y, label);
+	plotPoints.emplace_back(valueToXPlot(x), valueToYPlot(y), label);
 	inside.push_back(isInside(plotPoints.back()));
 
-	//if (hist != null) {
-	//	hist.addPlotPoint(plotPoints.getLastPoint());
-	//}
+	if (histIsActive) {
+		hist.addPlotPoint(plotPoints.back());
+	}
 }
 
 void ofxGLayer::addPoint(float x, float y) {
 	addPoint(x, y, "");
 }
 
-void ofxGLayer::addPoint(const ofxGPoint &newPoint) {
+void ofxGLayer::addPoint(const ofxGPoint& newPoint) {
 	addPoint(newPoint.getX(), newPoint.getY(), newPoint.getLabel());
 }
 
-void ofxGLayer::addPoint(int index, float x, float y, const string &label) {
+void ofxGLayer::addPoint(vector<ofxGPoint>::size_type index, float x, float y, const string& label) {
+	if (index > points.size()) {
+		throw invalid_argument("The index should be inside the vector range.");
+	}
 
+	points.insert(points.begin() + index, ofxGPoint(x, y, label));
+	plotPoints.insert(plotPoints.begin() + index, ofxGPoint(valueToXPlot(x), valueToYPlot(y), label));
+	inside.insert(inside.begin() + index, isInside(plotPoints[index]));
+
+	if (histIsActive) {
+		hist.addPlotPoint(index, plotPoints[index]);
+	}
 }
 
-void ofxGLayer::addPoint(int index, float x, float y) {
-
+void ofxGLayer::addPoint(vector<ofxGPoint>::size_type index, float x, float y) {
+	addPoint(index, x, y, "");
 }
 
-void ofxGLayer::addPoint(int index, const ofxGPoint &newPoint) {
-
+void ofxGLayer::addPoint(vector<ofxGPoint>::size_type index, const ofxGPoint& newPoint) {
+	addPoint(index, newPoint.getX(), newPoint.getY(), newPoint.getLabel());
 }
 
-void ofxGLayer::addPoints(const vector<ofxGPoint> &newPoints) {
-	for (ofxGPoint p : newPoints) {
-		points.push_back(p);
-		plotPoints.push_back(ofxGPoint(valueToXPlot(p.getX()), valueToYPlot(p.getY()), p.getLabel()));
+void ofxGLayer::addPoints(const vector<ofxGPoint>& newPoints) {
+	for (const ofxGPoint& p : newPoints) {
+		points.emplace_back(p.getX(), p.getY(), p.getLabel());
+		plotPoints.emplace_back(valueToXPlot(p.getX()), valueToYPlot(p.getY()), p.getLabel());
 		inside.push_back(isInside(plotPoints.back()));
 	}
 
-	//if (hist != null) {
-	//	hist.setPlotPoints(plotPoints);
-	//}
+	if (histIsActive) {
+		hist.setPlotPoints(plotPoints);
+	}
 }
 
-void ofxGLayer::removePoint(int index) {
+void ofxGLayer::removePoint(vector<ofxGPoint>::size_type index) {
+	if (index >= points.size()) {
+		throw invalid_argument("The index should be inside the vector range.");
+	}
 
+	points.erase(points.begin() + index);
+	plotPoints.erase(plotPoints.begin() + index);
+	inside.erase(inside.begin() + index);
+
+	if (histIsActive) {
+		hist.removePlotPoint(index);
+	}
 }
 
-void ofxGLayer::setInside(const vector<bool> &newInside) {
+void ofxGLayer::setInside(const vector<bool>& newInside) {
 	if (newInside.size() == inside.size()) {
-		inside = newInside;
+		throw invalid_argument("The vector size should match the number of points.");
 	}
+
+	inside = newInside;
 }
 
-void ofxGLayer::setPointColors(const vector<ofColor> &newPointColors) {
-	if (newPointColors.size() > 0) {
-		pointColors = newPointColors;
+void ofxGLayer::setPointColors(const vector<ofColor>& newPointColors) {
+	if (newPointColors.size() == 0) {
+		throw invalid_argument("The vector is empty.");
 	}
+
+	pointColors = newPointColors;
 }
 
-void ofxGLayer::setPointColor(const ofColor &newPointColor) {
+void ofxGLayer::setPointColor(const ofColor& newPointColor) {
 	pointColors = {newPointColor};
 }
 
-void ofxGLayer::setPointSizes(const vector<float> &newPointSizes) {
-	if (newPointSizes.size() > 0) {
-		pointSizes = newPointSizes;
+void ofxGLayer::setPointSizes(const vector<float>& newPointSizes) {
+	if (newPointSizes.size() == 0) {
+		throw invalid_argument("The vector is empty.");
 	}
+
+	pointSizes = newPointSizes;
 }
 
 void ofxGLayer::setPointSize(float newPointSize) {
 	pointSizes = {newPointSize};
 }
 
-void ofxGLayer::setLineColor(const ofColor &newLineColor) {
+void ofxGLayer::setLineColor(const ofColor& newLineColor) {
 	lineColor = newLineColor;
 }
 
 void ofxGLayer::setLineWidth(float newLineWidth) {
-	if (newLineWidth > 0) {
-		lineWidth = newLineWidth;
+	if (newLineWidth <= 0) {
+		throw invalid_argument("The line width should be larger than zero.");
 	}
+
+	lineWidth = newLineWidth;
 }
 
-void ofxGLayer::setHistBasePoint(const ofxGPoint &newHistBasePoint) {
+void ofxGLayer::setHistBasePoint(const ofxGPoint& newHistBasePoint) {
 	histBasePoint = newHistBasePoint;
 }
 
-void ofxGLayer::setHistType(int histType) {
-	//if (hist != null) {
-	//	hist.setType(histType);
-	//}
+void ofxGLayer::setHistType(ofxGHistogramType histType) {
+	if (histIsActive) {
+		hist.setType(histType);
+	}
 }
 
 void ofxGLayer::setHistVisible(bool visible) {
-	//if (hist != null) {
-	//	hist.setVisible(visible);
-	//}
+	if (histIsActive) {
+		hist.setVisible(visible);
+	}
 }
 
 void ofxGLayer::setDrawHistLabels(bool drawHistLabels) {
-	//if (hist != null) {
-	//	hist.setDrawLabels(drawHistLabels);
-	//}
+	if (histIsActive) {
+		hist.setDrawLabels(drawHistLabels);
+	}
 }
 
-void ofxGLayer::setLabelBgColor(const ofColor &newLabelBgColor) {
+void ofxGLayer::setLabelBgColor(const ofColor& newLabelBgColor) {
 	labelBgColor = newLabelBgColor;
 }
 
-void ofxGLayer::setLabelSeparation(const array<float, 2> &newLabelSeparation) {
+void ofxGLayer::setLabelSeparation(const array<float, 2>& newLabelSeparation) {
 	labelSeparation = newLabelSeparation;
 }
 
-void ofxGLayer::setFontName(const string &newFontName) {
+void ofxGLayer::setFontName(const string& newFontName) {
 	fontName = newFontName;
 	font.load(fontName, fontSize);
 }
 
-void ofxGLayer::setFontColor(const ofColor &newFontColor) {
+void ofxGLayer::setFontColor(const ofColor& newFontColor) {
 	fontColor = newFontColor;
 }
 
 void ofxGLayer::setFontSize(int newFontSize) {
-	if (newFontSize > 0) {
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }
 
-void ofxGLayer::setFontProperties(const string &newFontName, const ofColor &newFontColor, int newFontSize) {
-	if (newFontSize > 0) {
-		fontName = newFontName;
-		fontColor = newFontColor;
-		fontSize = newFontSize;
-		font.load(fontName, fontSize);
+void ofxGLayer::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
 	}
+
+	fontName = newFontName;
+	fontColor = newFontColor;
+	fontSize = newFontSize;
+	font.load(fontName, fontSize);
 }
 
-void ofxGLayer::setAllFontProperties(const string &newFontName, const ofColor &newFontColor, int newFontSize) {
+void ofxGLayer::setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
+	if (newFontSize <= 0) {
+		throw invalid_argument("The font size should be larger than zero.");
+	}
+
 	setFontProperties(newFontName, newFontColor, newFontSize);
 
-	//if (hist != null) {
-	//	hist.setFontProperties(newFontName, newFontColor, newFontSize);
-	//}
+	if (histIsActive) {
+		hist.setFontProperties(newFontName, newFontColor, newFontSize);
+	}
 }
 
 string ofxGLayer::getId() const {
@@ -830,7 +1217,7 @@ vector<ofxGPoint> ofxGLayer::getPoints() const {
 	return points;
 }
 
-vector<ofxGPoint> &ofxGLayer::getPointsRef() {
+const vector<ofxGPoint>& ofxGLayer::getPointsRef() {
 	return points;
 }
 
@@ -850,7 +1237,6 @@ float ofxGLayer::getLineWidth() const {
 	return lineWidth;
 }
 
-ofxGHistogram &ofxGLayer::getHistogram() {
+ofxGHistogram& ofxGLayer::getHistogram() {
 	return hist;
 }
-

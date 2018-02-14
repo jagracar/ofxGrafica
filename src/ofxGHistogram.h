@@ -18,11 +18,11 @@ public:
 	void setDim(float xDim, float yDim);
 	void setDim(const array<float, 2>& newDim);
 	void setPlotPoints(const vector<ofxGPoint>& newPlotPoints);
-	void setPlotPoint(int index, const ofxGPoint& newPlotPoint);
+	void setPlotPoint(vector<ofxGPoint>::size_type index, const ofxGPoint& newPlotPoint);
 	void addPlotPoint(const ofxGPoint& newPlotPoint);
-	void addPlotPoint(int index, ofxGPoint& newPlotPoint);
+	void addPlotPoint(vector<ofxGPoint>::size_type index, ofxGPoint& newPlotPoint);
 	void addPlotPoints(const vector<ofxGPoint>& newPlotPoints);
-	void removePlotPoint(int index);
+	void removePlotPoint(vector<ofxGPoint>::size_type index);
 	void setSeparations(const vector<float>& newSeparations);
 	void setBgColors(const vector<ofColor>& newBgColors);
 	void setLineColors(const vector<ofColor>& newLineColors);
