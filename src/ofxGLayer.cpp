@@ -31,7 +31,7 @@ ofxGLayer::ofxGLayer(const string& _id, const array<float, 2>& _dim, const array
 	// Font properties
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
-	fontSize = 11;
+	fontSize = 8;
 	font.load(fontName, fontSize);
 }
 
@@ -982,7 +982,7 @@ void ofxGLayer::drawLabel(const ofxGPoint& point) const {
 	if (isfinite(xPlot) && isfinite(yPlot)) {
 		float xLabelPos = xPlot + labelSeparation[0];
 		float yLabelPos = yPlot - labelSeparation[1];
-		float delta = fontSize / 4;
+		float delta = fontSize / 4.0;
 
 		ofRectangle bounds = font.getStringBoundingBox(point.getLabel(), 0, 0);
 
@@ -990,8 +990,8 @@ void ofxGLayer::drawLabel(const ofxGPoint& point) const {
 		ofFill();
 		ofSetColor(labelBgColor);
 		ofSetRectMode(OF_RECTMODE_CORNER);
-		ofDrawRectangle(xLabelPos - delta, yLabelPos - bounds.height - delta, bounds.width + 2 * delta,
-				bounds.height + 2 * delta);
+		ofDrawRectangle(xLabelPos - delta, yLabelPos - fontSize - delta, bounds.width + 2 * delta,
+				fontSize + 2 * delta);
 		ofSetColor(fontColor);
 		font.drawString(point.getLabel(), xLabelPos, yLabelPos);
 		ofPopStyle();
@@ -1105,17 +1105,15 @@ void ofxGLayer::drawAnnotation(const string& text, float x, float y, ofxGTextAli
 	float yPlot = valueToYPlot(y);
 
 	if (isfinite(xPlot) && isfinite(yPlot) && isInside(xPlot, yPlot)) {
-		ofRectangle bounds = font.getStringBoundingBox(text, 0, 0);
-
 		ofPushStyle();
 		ofSetColor(fontColor);
 
 		switch (verAlign) {
 		case GRAFICA_CENTER_ALIGN:
-			font.drawString(text, xPlot, yPlot - bounds.height / 2);
+			font.drawString(text, xPlot, yPlot + fontSize / 2.0);
 			break;
 		case GRAFICA_TOP_ALIGN:
-			font.drawString(text, xPlot, yPlot + bounds.height / 2);
+			font.drawString(text, xPlot, yPlot + fontSize);
 			break;
 		case GRAFICA_BOTTOM_ALIGN:
 			font.drawString(text, xPlot, yPlot);

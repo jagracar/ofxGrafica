@@ -20,7 +20,7 @@ ofxGHistogram::ofxGHistogram(ofxGHistogramType _type, const array<float, 2>& _di
 	// Font properties
 	fontName = "SansSerif.plain";
 	fontColor = ofColor(0);
-	fontSize = 11;
+	fontSize = 8;
 	font.load(fontName, fontSize);
 
 	// Update the histogram containers
@@ -172,7 +172,7 @@ void ofxGHistogram::drawHistLabels() const {
 				if (p.isValid() && p.getX() >= 0 && p.getX() <= dim[0]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					ofPushMatrix();
-					ofTranslate(p.getX() + bounds.height / 2, labelsOffset + bounds.width);
+					ofTranslate(p.getX() + fontSize / 2.0, labelsOffset + bounds.width);
 					ofRotateZ(-90);
 					font.drawString(p.getLabel(), 0, 0);
 					ofPopMatrix();
@@ -182,7 +182,7 @@ void ofxGHistogram::drawHistLabels() const {
 			for (ofxGPoint p : plotPoints) {
 				if (p.isValid() && p.getX() >= 0 && p.getX() <= dim[0]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
-					font.drawString(p.getLabel(), p.getX() - bounds.width / 2, labelsOffset + bounds.height);
+					font.drawString(p.getLabel(), p.getX() - bounds.width / 2, labelsOffset + fontSize);
 				}
 			}
 		}
@@ -202,7 +202,7 @@ void ofxGHistogram::drawHistLabels() const {
 			for (ofxGPoint p : plotPoints) {
 				if (p.isValid() && -p.getY() >= 0 && -p.getY() <= dim[1]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
-					font.drawString(p.getLabel(), -labelsOffset - bounds.width, p.getY() + bounds.height / 2);
+					font.drawString(p.getLabel(), -labelsOffset - bounds.width, p.getY() + fontSize / 2.0);
 				}
 			}
 		}

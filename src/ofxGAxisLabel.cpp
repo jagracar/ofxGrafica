@@ -14,7 +14,7 @@ ofxGAxisLabel::ofxGAxisLabel(ofxGAxisType _type, const array<float, 2>& _dim, co
 	textAlignment = GRAFICA_CENTER_ALIGN;
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
-	fontSize = 11;
+	fontSize = 10;
 	font.load(fontName, fontSize);
 }
 
@@ -42,23 +42,23 @@ void ofxGAxisLabel::drawAsXLabel() const {
 
 	if (rotate) {
 		ofPushMatrix();
-		ofTranslate(plotPos + bounds.height / 2, offset + bounds.width);
+		ofTranslate(plotPos + fontSize / 2.0, offset + bounds.width);
 		ofRotateZ(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
 		switch (textAlignment) {
 		case GRAFICA_CENTER_ALIGN:
-			font.drawString(text, plotPos - bounds.width / 2, offset + bounds.height);
+			font.drawString(text, plotPos - bounds.width / 2, offset + fontSize);
 			break;
 		case GRAFICA_LEFT_ALIGN:
-			font.drawString(text, plotPos, offset + bounds.height);
+			font.drawString(text, plotPos, offset + fontSize);
 			break;
 		case GRAFICA_RIGHT_ALIGN:
-			font.drawString(text, plotPos - bounds.width, offset + bounds.height);
+			font.drawString(text, plotPos - bounds.width, offset + fontSize);
 			break;
 		default:
-			font.drawString(text, plotPos - bounds.width / 2, offset + bounds.height);
+			font.drawString(text, plotPos - bounds.width / 2, offset + fontSize);
 			break;
 		}
 	}
@@ -93,7 +93,7 @@ void ofxGAxisLabel::drawAsYLabel() const {
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
-		font.drawString(text, -offset - bounds.width, plotPos + bounds.height / 2);
+		font.drawString(text, -offset - bounds.width, plotPos + fontSize / 2.0);
 	}
 
 	ofPopStyle();
@@ -106,7 +106,7 @@ void ofxGAxisLabel::drawAsTopLabel() const {
 
 	if (rotate) {
 		ofPushMatrix();
-		ofTranslate(plotPos + bounds.height / 2, -offset - dim[1]);
+		ofTranslate(plotPos + fontSize / 2.0, -offset - dim[1]);
 		ofRotateZ(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
@@ -140,16 +140,16 @@ void ofxGAxisLabel::drawAsRightLabel() const {
 
 		switch (textAlignment) {
 		case GRAFICA_CENTER_ALIGN:
-			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width / 2);
+			ofTranslate(offset + dim[0] + fontSize, plotPos + bounds.width / 2);
 			break;
 		case GRAFICA_LEFT_ALIGN:
-			ofTranslate(offset + dim[0] + bounds.height, plotPos);
+			ofTranslate(offset + dim[0] + fontSize, plotPos);
 			break;
 		case GRAFICA_RIGHT_ALIGN:
-			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width);
+			ofTranslate(offset + dim[0] + fontSize, plotPos + bounds.width);
 			break;
 		default:
-			ofTranslate(offset + dim[0] + bounds.height, plotPos + bounds.width / 2);
+			ofTranslate(offset + dim[0] + fontSize, plotPos + bounds.width / 2);
 			break;
 		}
 
@@ -157,7 +157,7 @@ void ofxGAxisLabel::drawAsRightLabel() const {
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
-		font.drawString(text, offset + dim[0], plotPos + bounds.height / 2);
+		font.drawString(text, offset + dim[0], plotPos + fontSize / 2.0);
 	}
 
 	ofPopStyle();

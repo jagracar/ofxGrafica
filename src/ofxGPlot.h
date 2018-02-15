@@ -16,7 +16,7 @@ public:
 	ofxGPlot(float xPos = 0, float yPos = 0, float plotWidth = 450, float plotHeight = 300);
 
 	// Other methods
-	void addLayer(ofxGLayer& newLayer);
+	void addLayer(const ofxGLayer& newLayer);
 	void addLayer(const string& id, const vector<ofxGPoint>& points);
 	void removeLayer(const string& id);
 	array<float, 2> getPlotPosAt(float xScreen, float yScreen) const;
@@ -243,7 +243,7 @@ protected:
 
 	// Layers
 	ofxGLayer mainLayer;
-	vector<ofxGLayer*> layerList;
+	vector<ofxGLayer> layerList;
 
 	// Axes and title
 	ofxGAxis xAxis;

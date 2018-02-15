@@ -64,7 +64,7 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	resetKeyModifier = OF_KEY_CONTROL;
 }
 
-void ofxGPlot::addLayer(ofxGLayer& newLayer) {
+void ofxGPlot::addLayer(const ofxGLayer& newLayer) {
 	// Check that it is the only layer with that id
 	string id = newLayer.getId();
 	bool sameId = false;
@@ -72,8 +72,8 @@ void ofxGPlot::addLayer(ofxGLayer& newLayer) {
 	if (mainLayer.isId(id)) {
 		sameId = true;
 	} else {
-		for (const ofxGLayer* layer : layerList) {
-			if (layer->isId(id)) {
+		for (ofxGLayer& layer : layerList) {
+			if (layer.isId(id)) {
 				sameId = true;
 				break;
 			}
@@ -82,9 +82,9 @@ void ofxGPlot::addLayer(ofxGLayer& newLayer) {
 
 	// Add the layer to the list
 	if (!sameId) {
-		newLayer.setDim(dim);
-		newLayer.setLimAndLog(xLim, yLim, xLog, yLog);
-		layerList.push_back(&newLayer);
+		layerList.push_back(newLayer);
+		layerList.back().setDim(dim);
+		layerList.back().setLimAndLog(xLim, yLim, xLog, yLog);
 
 		// Calculate and update the new plot limits if necessary
 		if (includeAllLayersInLim) {
@@ -102,8 +102,8 @@ void ofxGPlot::addLayer(const string& id, const vector<ofxGPoint>& points) {
 	if (mainLayer.isId(id)) {
 		sameId = true;
 	} else {
-		for (const ofxGLayer* layer : layerList) {
-			if (layer->isId(id)) {
+		for (const ofxGLayer& layer : layerList) {
+			if (layer.isId(id)) {
 				sameId = true;
 				break;
 			}
@@ -112,9 +112,8 @@ void ofxGPlot::addLayer(const string& id, const vector<ofxGPoint>& points) {
 
 	// Add the layer to the list
 	if (!sameId) {
-		ofxGLayer layer(id, dim, xLim, yLim, xLog, yLog);
-		layer.setPoints(points);
-		layerList.emplace_back(&layer);
+		layerList.emplace_back(id, dim, xLim, yLim, xLog, yLog);
+		layerList.back().setPoints(points);
 
 		// Calculate and update the new plot limits if necessary
 		if (includeAllLayersInLim) {
@@ -129,7 +128,7 @@ void ofxGPlot::removeLayer(const string& id) {
 	int index = -1;
 
 	for (vector<ofxGLayer>::size_type i = 0; i < layerList.size(); ++i) {
-		if (layerList[i]->isId(id)) {
+		if (layerList[i].isId(id)) {
 			index = i;
 			break;
 		}
@@ -173,10 +172,10 @@ const ofxGPoint* ofxGPlot::getPointAt(float xScreen, float yScreen, const string
 	if (mainLayer.isId(layerId)) {
 		p = getPointAt(xScreen, yScreen);
 	} else {
-		for (ofxGLayer* layer : layerList) {
-			if (layer->isId(layerId)) {
+		for (const ofxGLayer& layer : layerList) {
+			if (layer.isId(layerId)) {
 				array<float, 2> plotPos = getPlotPosAt(xScreen, yScreen);
-				p = layer->getPointAtPlotPos(plotPos[0], plotPos[1]);
+				p = layer.getPointAtPlotPos(plotPos[0], plotPos[1]);
 				break;
 			}
 		}
@@ -252,8 +251,8 @@ void ofxGPlot::updateLimits() {
 	// Update the layers
 	mainLayer.setXYLim(xLim, yLim);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->setXYLim(xLim, yLim);
+	for (ofxGLayer& layer : layerList) {
+		layer.setXYLim(xLim, yLim);
 	}
 }
 
@@ -263,8 +262,8 @@ array<float, 2> ofxGPlot::calculatePlotXLim() {
 
 	// Include the other layers in the limit calculation if necessary
 	if (includeAllLayersInLim) {
-		for (ofxGLayer* layer : layerList) {
-			array<float, 2> newLim = calculatePointsXLim(layer->getPointsRef());
+		for (ofxGLayer& layer : layerList) {
+			array<float, 2> newLim = calculatePointsXLim(layer.getPointsRef());
 
 			if (isfinite(newLim[0])) {
 				if (isfinite(lim[0])) {
@@ -318,8 +317,8 @@ array<float, 2> ofxGPlot::calculatePlotYLim() {
 
 	// Include the other layers in the limit calculation if necessary
 	if (includeAllLayersInLim) {
-		for (ofxGLayer* layer : layerList) {
-			array<float, 2> newLim = calculatePointsYLim(layer->getPointsRef());
+		for (ofxGLayer& layer : layerList) {
+			array<float, 2> newLim = calculatePointsYLim(layer.getPointsRef());
 
 			if (isfinite(newLim[0])) {
 				if (isfinite(lim[0])) {
@@ -619,16 +618,16 @@ void ofxGPlot::center(float xScreen, float yScreen) {
 void ofxGPlot::startHistograms(ofxGHistogramType histType) {
 	mainLayer.startHistogram(histType);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->startHistogram(histType);
+	for (ofxGLayer& layer : layerList) {
+		layer.startHistogram(histType);
 	}
 }
 
 void ofxGPlot::stopHistograms() {
 	mainLayer.stopHistogram();
 
-	for (ofxGLayer* layer : layerList) {
-		layer->stopHistogram();
+	for (ofxGLayer& layer : layerList) {
+		layer.stopHistogram();
 	}
 }
 
@@ -700,24 +699,24 @@ void ofxGPlot::drawTitle() const {
 void ofxGPlot::drawPoints() const {
 	mainLayer.drawPoints();
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawPoints();
+	for (const ofxGLayer& layer : layerList) {
+		layer.drawPoints();
 	}
 }
 
 void ofxGPlot::drawPoints(ofPath& pointShape) const {
 	mainLayer.drawPoints(pointShape);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawPoints(pointShape);
+	for (const ofxGLayer& layer : layerList) {
+		layer.drawPoints(pointShape);
 	}
 }
 
 void ofxGPlot::drawPoints(const ofImage& pointImg) const {
 	mainLayer.drawPoints(pointImg);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawPoints(pointImg);
+	for (const ofxGLayer& layer : layerList) {
+		layer.drawPoints(pointImg);
 	}
 }
 
@@ -744,8 +743,8 @@ void ofxGPlot::drawPoint(const ofxGPoint& point, const ofImage& pointImg) const 
 void ofxGPlot::drawLines() {
 	mainLayer.drawLines();
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawLines();
+	for (ofxGLayer& layer : layerList) {
+		layer.drawLines();
 	}
 }
 
@@ -784,8 +783,8 @@ void ofxGPlot::drawVerticalLine(float value) const {
 void ofxGPlot::drawFilledContours(ofxGContourType contourType, float referenceValue) {
 	mainLayer.drawFilledContour(contourType, referenceValue);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawFilledContour(contourType, referenceValue);
+	for (ofxGLayer& layer : layerList) {
+		layer.drawFilledContour(contourType, referenceValue);
 	}
 }
 
@@ -797,8 +796,8 @@ void ofxGPlot::drawLabelsAt(float xScreen, float yScreen) const {
 	array<float, 2> plotPos = getPlotPosAt(xScreen, yScreen);
 	mainLayer.drawLabelAtPlotPos(plotPos[0], plotPos[1]);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawLabelAtPlotPos(plotPos[0], plotPos[1]);
+	for (const ofxGLayer& layer : layerList) {
+		layer.drawLabelAtPlotPos(plotPos[0], plotPos[1]);
 	}
 }
 
@@ -839,8 +838,8 @@ void ofxGPlot::drawGridLines(ofxGDirection gridType) const {
 void ofxGPlot::drawHistograms() {
 	mainLayer.drawHistogram();
 
-	for (ofxGLayer* layer : layerList) {
-		layer->drawHistogram();
+	for (ofxGLayer& layer : layerList) {
+		layer.drawHistogram();
 	}
 }
 
@@ -867,9 +866,9 @@ void ofxGPlot::drawLegend(const vector<string>& text, const vector<float>& xRela
 			ofDrawRectangle(plotPosition[0] - 15, plotPosition[1], 14, 14);
 			mainLayer.drawAnnotation(text[i], position[0], position[1], GRAFICA_CENTER_ALIGN);
 		} else {
-			ofSetColor(layerList[i - 1]->getLineColor());
+			ofSetColor(layerList[i - 1].getLineColor());
 			ofDrawRectangle(plotPosition[0] - 15, plotPosition[1], 14, 14);
-			layerList[i - 1]->drawAnnotation(text[i], position[0], position[1], GRAFICA_CENTER_ALIGN);
+			layerList[i - 1].drawAnnotation(text[i], position[0], position[1], GRAFICA_CENTER_ALIGN);
 		}
 	}
 
@@ -902,8 +901,8 @@ void ofxGPlot::setOuterDim(float xOuterDim, float yOuterDim) {
 			// Update the layers
 			mainLayer.setDim(dim);
 
-			for (ofxGLayer* layer : layerList) {
-				layer->setDim(dim);
+			for (ofxGLayer& layer : layerList) {
+				layer.setDim(dim);
 			}
 		}
 	}
@@ -946,8 +945,8 @@ void ofxGPlot::setDim(float xDim, float yDim) {
 			// Update the layers
 			mainLayer.setDim(dim);
 
-			for (ofxGLayer* layer : layerList) {
-				layer->setDim(dim);
+			for (ofxGLayer& layer : layerList) {
+				layer.setDim(dim);
 			}
 		}
 	}
@@ -1074,8 +1073,8 @@ void ofxGPlot::setLogScale(const string& logType) {
 		// Update the layers
 		mainLayer.setLimAndLog(xLim, yLim, xLog, yLog);
 
-		for (ofxGLayer* layer : layerList) {
-			layer->setLimAndLog(xLim, yLim, xLog, yLog);
+		for (ofxGLayer& layer : layerList) {
+			layer.setLimAndLog(xLim, yLim, xLog, yLog);
 		}
 	}
 }
@@ -1092,8 +1091,8 @@ void ofxGPlot::setInvertedXScale(bool newInvertedXScale) {
 		// Update the layers
 		mainLayer.setXLim(xLim);
 
-		for (ofxGLayer* layer : layerList) {
-			layer->setXLim(xLim);
+		for (ofxGLayer& layer : layerList) {
+			layer.setXLim(xLim);
 		}
 	}
 }
@@ -1114,8 +1113,8 @@ void ofxGPlot::setInvertedYScale(bool newInvertedYScale) {
 		// Update the layers
 		mainLayer.setYLim(yLim);
 
-		for (ofxGLayer* layer : layerList) {
-			layer->setYLim(yLim);
+		for (ofxGLayer& layer : layerList) {
+			layer.setYLim(yLim);
 		}
 	}
 }
@@ -1405,8 +1404,8 @@ void ofxGPlot::setAllFontProperties(const string& fontName, const ofColor& fontC
 
 	mainLayer.setAllFontProperties(fontName, fontColor, fontSize);
 
-	for (ofxGLayer* layer : layerList) {
-		layer->setAllFontProperties(fontName, fontColor, fontSize);
+	for (ofxGLayer& layer : layerList) {
+		layer.setAllFontProperties(fontName, fontColor, fontSize);
 	}
 }
 
@@ -1467,9 +1466,9 @@ ofxGLayer& ofxGPlot::getLayer(const string& layerId) {
 		return mainLayer;
 	}
 
-	for (ofxGLayer* layer : layerList) {
-		if (layer->isId(layerId)) {
-			return *layer;
+	for (ofxGLayer& layer : layerList) {
+		if (layer.isId(layerId)) {
+			return layer;
 		}
 	}
 
@@ -1505,9 +1504,9 @@ vector<ofxGPoint> ofxGPlot::getPoints(const string& layerId) const {
 		return mainLayer.getPoints();
 	}
 
-	for (ofxGLayer* layer : layerList) {
-		if (layer->isId(layerId)) {
-			return layer->getPoints();
+	for (const ofxGLayer& layer : layerList) {
+		if (layer.isId(layerId)) {
+			return layer.getPoints();
 		}
 	}
 
@@ -1523,9 +1522,9 @@ const vector<ofxGPoint>& ofxGPlot::getPointsRef(const string& layerId) const {
 		return mainLayer.getPointsRef();
 	}
 
-	for (ofxGLayer* layer : layerList) {
-		if (layer->isId(layerId)) {
-			return layer->getPointsRef();
+	for (const ofxGLayer& layer : layerList) {
+		if (layer.isId(layerId)) {
+			return layer.getPointsRef();
 		}
 	}
 

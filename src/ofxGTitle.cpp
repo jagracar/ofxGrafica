@@ -7,13 +7,13 @@ ofxGTitle::ofxGTitle(const array<float, 2>& _dim, const string& _text) :
 	// General properties
 	relativePos = 0.5;
 	plotPos = relativePos * dim[0];
-	offset = 10;
+	offset = 13;
 
 	// Font properties
 	textAlignment = GRAFICA_CENTER_ALIGN;
 	fontName = "SansSerif.rtt";
 	fontColor = ofColor(100);
-	fontSize = 11;
+	fontSize = 10;
 	font.load(fontName, fontSize);
 }
 

@@ -24,7 +24,7 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<
 	expTickLabels = false;
 	rotateTickLabels = (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) ? false : true;
 	drawTickLabels = (type == GRAFICA_X_AXIS || type == GRAFICA_Y_AXIS) ? true : false;
-	tickLabelOffset = 7;
+	tickLabelOffset = 8;
 
 	// Label properties
 	lab = ofxGAxisLabel(type, dim);
@@ -33,7 +33,7 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<
 	// Font properties
 	fontName = "SansSerif.ttf";
 	fontColor = ofColor(0);
-	fontSize = 9;
+	fontSize = 8;
 	font.load(fontName, fontSize);
 
 	// Update the tick containers
@@ -325,7 +325,7 @@ void ofxGAxis::drawAsXAxis() const {
 					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(plotTicks[i] + bounds.height / 2, offset + tickLabelOffset + bounds.width);
+					ofTranslate(plotTicks[i] + fontSize / 2.0, offset + tickLabelOffset + bounds.width);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -336,7 +336,7 @@ void ofxGAxis::drawAsXAxis() const {
 				if (ticksInside[i] && tickLabels[i] != "") {
 					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 					font.drawString(tickLabels[i], plotTicks[i] - bounds.width / 2,
-							offset + tickLabelOffset + bounds.height);
+							offset + tickLabelOffset + fontSize);
 				}
 			}
 		}
@@ -384,7 +384,7 @@ void ofxGAxis::drawAsYAxis() const {
 				if (ticksInside[i] && tickLabels[i] != "") {
 					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 					font.drawString(tickLabels[i], -offset - tickLabelOffset - bounds.width,
-							plotTicks[i] + bounds.height / 2);
+							plotTicks[i] + fontSize / 2.0);
 				}
 			}
 		}
@@ -421,10 +421,8 @@ void ofxGAxis::drawAsTopAxis() const {
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
-					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
-
 					ofPushMatrix();
-					ofTranslate(plotTicks[i] + bounds.height / 2, -offset - tickLabelOffset);
+					ofTranslate(plotTicks[i] + fontSize / 2.0, -offset - tickLabelOffset);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -475,7 +473,7 @@ void ofxGAxis::drawAsRightAxis() const {
 					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
 
 					ofPushMatrix();
-					ofTranslate(offset + tickLabelOffset + bounds.height, plotTicks[i] + bounds.width / 2);
+					ofTranslate(offset + tickLabelOffset + fontSize, plotTicks[i] + bounds.width / 2);
 					ofRotateZ(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
@@ -485,7 +483,7 @@ void ofxGAxis::drawAsRightAxis() const {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
 					ofRectangle bounds = font.getStringBoundingBox(tickLabels[i], 0, 0);
-					font.drawString(tickLabels[i], offset + tickLabelOffset, plotTicks[i] + bounds.height / 2);
+					font.drawString(tickLabels[i], offset + tickLabelOffset, plotTicks[i] + fontSize / 2.0);
 				}
 			}
 		}

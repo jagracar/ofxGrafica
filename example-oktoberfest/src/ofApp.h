@@ -20,4 +20,8 @@ public:
 	void gotMessage(ofMessage msg);
 
 	ofxGPlot plot;
+	vector<string> monthNames;
+	vector<int> daysPerMonth;
+	vector<int> daysPerMonthLeapYear;
+	float getExactDate(int year, int month, int day);
 };
