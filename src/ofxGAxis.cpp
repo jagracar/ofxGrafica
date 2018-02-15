@@ -99,7 +99,7 @@ void ofxGAxis::obtainLinearTicks() {
 		step = roundPlus(step, sigDigits);
 
 		if (step == 0 || abs(step) > abs(lim[1] - lim[0])) {
-			sigDigits++;
+			++sigDigits;
 			step = roundPlus((lim[1] - lim[0]) / nTicks, sigDigits);
 		}
 
@@ -233,7 +233,7 @@ void ofxGAxis::moveLim(array<float, 2>& newLim) {
 				sigDigits = obtainSigDigits(step);
 
 				while (abs(roundPlus(step, sigDigits) - step) > abs(0.001 * step)) {
-					sigDigits++;
+					++sigDigits;
 				}
 			} else {
 				step = (n == 1) ? lim[1] - lim[0] : ticks[1] - ticks[0];
@@ -241,7 +241,7 @@ void ofxGAxis::moveLim(array<float, 2>& newLim) {
 				step = roundPlus(step, sigDigits);
 
 				if (step == 0 || abs(step) > abs(lim[1] - lim[0])) {
-					sigDigits++;
+					++sigDigits;
 					step = (n == 1) ? lim[1] - lim[0] : ticks[1] - ticks[0];
 					step = roundPlus(step, sigDigits);
 				}
@@ -262,7 +262,7 @@ void ofxGAxis::moveLim(array<float, 2>& newLim) {
 			n = floor(abs((lim[1] - firstTick) / step)) + 1;
 			ticks.clear();
 
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < n; ++i) {
 				ticks.push_back(roundPlus(firstTick + i * step, sigDigits));
 			}
 		}
@@ -532,7 +532,7 @@ void ofxGAxis::setLimAndLog(const array<float, 2>& newLim, bool newLog) {
 	// Check that the new limit makes sense
 	if (newLim[1] == newLim[0]) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+	} else if (newLog && (newLim[0] <= 0 || newLim[1] <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -728,7 +728,7 @@ vector<float> ofxGAxis::getTicks() const {
 	}
 }
 
-const vector<float>& ofxGAxis::getTicksRef() {
+const vector<float>& ofxGAxis::getTicksRef() const {
 	return ticks;
 }
 
@@ -749,7 +749,7 @@ vector<float> ofxGAxis::getPlotTicks() const {
 	}
 }
 
-const vector<float>& ofxGAxis::getPlotTicksRef() {
+const vector<float>& ofxGAxis::getPlotTicksRef() const {
 	return plotTicks;
 }
 

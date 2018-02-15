@@ -19,6 +19,8 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	ofxGPlot plot;
-	bool logScale;
+	ofxGPlot plot1;
+	ofxGPlot plot2;
+	ofxGPlot plot3;
+	ofxGPlot plot4;
 };

@@ -64,7 +64,7 @@ void ofxGHistogram::updateArrays() {
 		leftSides.push_back(differences[0]);
 		rightSides.push_back(differences[0]);
 
-		for (int i = 1; i < nPoints - 1; i++) {
+		for (int i = 1; i < nPoints - 1; ++i) {
 			leftSides.push_back(differences[i - 1]);
 			rightSides.push_back(differences[i]);
 		}

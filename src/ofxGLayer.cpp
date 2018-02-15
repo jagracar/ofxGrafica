@@ -665,17 +665,315 @@ void ofxGLayer::drawVerticalLine(float value) const {
 	drawVerticalLine(value, lineColor, lineWidth);
 }
 
-void ofxGLayer::drawFilledContour(int contourType, float referenceValue) const {
+void ofxGLayer::drawFilledContour(ofxGContourType contourType, float referenceValue) {
+	// Get the points that compose the shape
+	vector<ofxGPoint> shapePoints;
 
+	if (contourType == GRAFICA_HORIZONTAL_CONTOUR) {
+		shapePoints = getHorizontalShape(referenceValue);
+	} else {
+		shapePoints = getVerticalShape(referenceValue);
+	}
+
+	// Draw the shape
+	if (shapePoints.size() > 0) {
+		ofPushStyle();
+		ofFill();
+		ofSetColor(lineColor);
+
+		ofBeginShape();
+
+		for (const ofxGPoint& p : shapePoints) {
+			if (p.isValid()) {
+				ofVertex(p.getX(), p.getY());
+			}
+		}
+
+		ofEndShape(true);
+
+		ofPopStyle();
+	}
 }
 
-//vector<ofxGPoint> ofxGLayer::getHorizontalShape(float referenceValue) {
-//
-//}
+vector<ofxGPoint> ofxGLayer::getHorizontalShape(float referenceValue) {
+	// Collect the points and cuts inside the box
+	int nPoints = plotPoints.size();
+	vector<ofxGPoint> shapePoints;
+	int indexFirstPoint = -1;
+	int indexLastPoint = -1;
 
-//vector<ofxGPoint> ofxGLayer::getVerticalShape(float referenceValue) {
-//
-//}
+	for (int i = 0; i < nPoints; ++i) {
+		if (plotPoints[i].isValid()) {
+			bool addedPoints = false;
+
+			// Add the point if it's inside the box
+			if (inside[i]) {
+				shapePoints.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), "normal point");
+				addedPoints = true;
+			} else if (plotPoints[i].getX() >= 0 && plotPoints[i].getX() <= dim[0]) {
+				// If it's outside, add the projection of the point on the
+				// horizontal axes
+				if (-plotPoints[i].getY() < 0) {
+					shapePoints.emplace_back(plotPoints[i].getX(), 0, "projection");
+					addedPoints = true;
+				} else {
+					shapePoints.emplace_back(plotPoints[i].getX(), -dim[1], "projection");
+					addedPoints = true;
+				}
+			}
+
+			// Add the box cuts if there is any
+			int nextIndex = i + 1;
+
+			while (nextIndex < nPoints - 1 && !plotPoints[nextIndex].isValid()) {
+				++nextIndex;
+			}
+
+			if (nextIndex < nPoints && plotPoints[nextIndex].isValid()) {
+				int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[nextIndex]);
+
+				for (int j = 0; j < nCuts; ++j) {
+					shapePoints.emplace_back(cuts[j][0], cuts[j][1], "cut");
+					addedPoints = true;
+				}
+			}
+
+			if (addedPoints) {
+				if (indexFirstPoint < 0) {
+					indexFirstPoint = i;
+				}
+
+				indexLastPoint = i;
+			}
+		}
+	}
+
+	// Continue if there are points in the shape
+	if (shapePoints.size() > 0) {
+		// Calculate the starting point
+		ofxGPoint startPoint = shapePoints[0];
+
+		if (startPoint.getX() != 0 && startPoint.getX() != dim[0]) {
+			if (startPoint.getLabel() == "cut") {
+				if (plotPoints[indexFirstPoint].getX() < 0) {
+					startPoint.setX(0);
+					startPoint.setLabel("extreme");
+				} else {
+					startPoint.setX(dim[0]);
+					startPoint.setLabel("extreme");
+				}
+			} else if (indexFirstPoint != 0) {
+				// Get the previous valid point
+				int prevIndex = indexFirstPoint - 1;
+
+				while (prevIndex > 0 && !plotPoints[prevIndex].isValid()) {
+					--prevIndex;
+				}
+
+				if (plotPoints[prevIndex].isValid()) {
+					if (plotPoints[prevIndex].getX() < 0) {
+						startPoint.setX(0);
+						startPoint.setLabel("extreme");
+					} else {
+						startPoint.setX(dim[0]);
+						startPoint.setLabel("extreme");
+					}
+				}
+			}
+		}
+
+		// Calculate the end point
+		ofxGPoint endPoint = shapePoints.back();
+
+		if (endPoint.getX() != 0 && endPoint.getX() != dim[0] && indexLastPoint != nPoints - 1) {
+			int nextIndex = indexLastPoint + 1;
+
+			while (nextIndex < nPoints - 1 && !plotPoints[nextIndex].isValid()) {
+				++nextIndex;
+			}
+
+			if (plotPoints[nextIndex].isValid()) {
+				if (plotPoints[nextIndex].getX() < 0) {
+					endPoint.setX(0);
+					endPoint.setLabel("extreme");
+				} else {
+					endPoint.setX(dim[0]);
+					endPoint.setLabel("extreme");
+				}
+			}
+		}
+
+		// Add the end point if it's a new extreme
+		if (endPoint.getLabel() == "extreme") {
+			shapePoints.push_back(endPoint);
+		}
+
+		// Add the reference connections
+		if (yLog && referenceValue <= 0) {
+			referenceValue = min(yLim[0], yLim[1]);
+		}
+
+		array<float, 2> plotReference = valueToPlot(1, referenceValue);
+
+		if (-plotReference[1] < 0) {
+			shapePoints.emplace_back(endPoint.getX(), 0);
+			shapePoints.emplace_back(startPoint.getX(), 0);
+		} else if (-plotReference[1] > dim[1]) {
+			shapePoints.emplace_back(endPoint.getX(), -dim[1]);
+			shapePoints.emplace_back(startPoint.getX(), -dim[1]);
+		} else {
+			shapePoints.emplace_back(endPoint.getX(), plotReference[1]);
+			shapePoints.emplace_back(startPoint.getX(), plotReference[1]);
+		}
+
+		// Add the starting point if it's a new extreme
+		if (startPoint.getLabel() == "extreme") {
+			shapePoints.push_back(startPoint);
+		}
+	}
+
+	return shapePoints;
+}
+
+vector<ofxGPoint> ofxGLayer::getVerticalShape(float referenceValue) {
+	// Collect the points and cuts inside the box
+	int nPoints = plotPoints.size();
+	vector<ofxGPoint> shapePoints;
+	int indexFirstPoint = -1;
+	int indexLastPoint = -1;
+
+	for (int i = 0; i < nPoints; ++i) {
+		if (plotPoints[i].isValid()) {
+			bool addedPoints = false;
+
+			// Add the point if it's inside the box
+			if (inside[i]) {
+				shapePoints.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), "normal point");
+				addedPoints = true;
+			} else if (-plotPoints[i].getY() >= 0 && -plotPoints[i].getY() <= dim[1]) {
+				// If it's outside, add the projection of the point on the
+				// vertical axes
+				if (plotPoints[i].getX() < 0) {
+					shapePoints.emplace_back(0, plotPoints[i].getY(), "projection");
+					addedPoints = true;
+				} else {
+					shapePoints.emplace_back(dim[0], plotPoints[i].getY(), "projection");
+					addedPoints = true;
+				}
+			}
+
+			// Add the box cuts if there is any
+			int nextIndex = i + 1;
+
+			while (nextIndex < nPoints - 1 && !plotPoints[nextIndex].isValid()) {
+				++nextIndex;
+			}
+
+			if (nextIndex < nPoints && plotPoints[nextIndex].isValid()) {
+				int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[nextIndex]);
+
+				for (int j = 0; j < nCuts; ++j) {
+					shapePoints.emplace_back(cuts[j][0], cuts[j][1], "cut");
+					addedPoints = true;
+				}
+			}
+
+			if (addedPoints) {
+				if (indexFirstPoint < 0) {
+					indexFirstPoint = i;
+				}
+
+				indexLastPoint = i;
+			}
+		}
+	}
+
+	// Continue if there are points in the shape
+	if (shapePoints.size() > 0) {
+		// Calculate the starting point
+		ofxGPoint startPoint = shapePoints[0];
+
+		if (startPoint.getY() != 0 && startPoint.getY() != -dim[1]) {
+			if (startPoint.getLabel() == "cut") {
+				if (-plotPoints[indexFirstPoint].getY() < 0) {
+					startPoint.setY(0);
+					startPoint.setLabel("extreme");
+				} else {
+					startPoint.setY(-dim[1]);
+					startPoint.setLabel("extreme");
+				}
+			} else if (indexFirstPoint != 0) {
+				// Get the previous valid point
+				int prevIndex = indexFirstPoint - 1;
+
+				while (prevIndex > 0 && !plotPoints[prevIndex].isValid()) {
+					--prevIndex;
+				}
+
+				if (plotPoints[prevIndex].isValid()) {
+					if (-plotPoints[prevIndex].getY() < 0) {
+						startPoint.setY(0);
+						startPoint.setLabel("extreme");
+					} else {
+						startPoint.setY(-dim[1]);
+						startPoint.setLabel("extreme");
+					}
+				}
+			}
+		}
+
+		// Calculate the end point
+		ofxGPoint endPoint = shapePoints.back();
+
+		if (endPoint.getY() != 0 && endPoint.getY() != -dim[1] && indexLastPoint != nPoints - 1) {
+			int nextIndex = indexLastPoint + 1;
+
+			while (nextIndex < nPoints - 1 && !plotPoints[nextIndex].isValid()) {
+				++nextIndex;
+			}
+
+			if (plotPoints[nextIndex].isValid()) {
+				if (-plotPoints[nextIndex].getY() < 0) {
+					endPoint.setY(0);
+					endPoint.setLabel("extreme");
+				} else {
+					endPoint.setY(-dim[1]);
+					endPoint.setLabel("extreme");
+				}
+			}
+		}
+
+		// Add the end point if it's a new extreme
+		if (endPoint.getLabel() == "extreme") {
+			shapePoints.push_back(endPoint);
+		}
+
+		// Add the reference connections
+		if (xLog && referenceValue <= 0) {
+			referenceValue = min(xLim[0], xLim[1]);
+		}
+
+		array<float, 2> plotReference = valueToPlot(referenceValue, 1);
+
+		if (plotReference[0] < 0) {
+			shapePoints.emplace_back(0, endPoint.getY());
+			shapePoints.emplace_back(0, startPoint.getY());
+		} else if (plotReference[0] > dim[0]) {
+			shapePoints.emplace_back(dim[0], endPoint.getY());
+			shapePoints.emplace_back(dim[0], startPoint.getY());
+		} else {
+			shapePoints.emplace_back(plotReference[0], endPoint.getY());
+			shapePoints.emplace_back(plotReference[0], startPoint.getY());
+		}
+
+		// Add the starting point if it's a new extreme
+		if (startPoint.getLabel() == "extreme") {
+			shapePoints.emplace_back(startPoint);
+		}
+	}
+
+	return shapePoints;
+}
 
 void ofxGLayer::drawLabel(const ofxGPoint& point) const {
 	float xPlot = valueToXPlot(point.getX());
@@ -1217,7 +1515,7 @@ vector<ofxGPoint> ofxGLayer::getPoints() const {
 	return points;
 }
 
-const vector<ofxGPoint>& ofxGLayer::getPointsRef() {
+const vector<ofxGPoint>& ofxGLayer::getPointsRef() const {
 	return points;
 }
 

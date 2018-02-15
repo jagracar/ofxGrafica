@@ -45,7 +45,7 @@ public:
 	void drawHorizontalLine(float value) const;
 	void drawVerticalLine(float value, const ofColor& lc, float lw) const;
 	void drawVerticalLine(float value) const;
-	void drawFilledContour(int contourType, float referenceValue) const;
+	void drawFilledContour(ofxGContourType contourType, float referenceValue);
 	void drawLabel(const ofxGPoint& point) const;
 	void drawLabelAtPlotPos(float xPlot, float yPlot) const;
 	void drawHistogram() const;
@@ -104,7 +104,7 @@ public:
 	bool getXLog() const;
 	bool getYLog() const;
 	vector<ofxGPoint> getPoints() const;
-	const vector<ofxGPoint>& getPointsRef();
+	const vector<ofxGPoint>& getPointsRef() const;
 	vector<ofColor> getPointColors() const;
 	vector<float> getPointSizes() const;
 	ofColor getLineColor() const;
