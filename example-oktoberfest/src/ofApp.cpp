@@ -52,7 +52,7 @@ void ofApp::setup() {
 	plot.setLineColor(ofColor(100, 100, 100));
 	plot.addLayer("German elections day", pointsElections);
 	plot.getLayer("German elections day").setLineColor(ofColor(255, 100, 255));
-	//plot.activatePointLabels();
+	plot.activatePointLabels();
 }
 
 float ofApp::getExactDate(int year, int month, int day) {

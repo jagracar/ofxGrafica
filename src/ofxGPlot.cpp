@@ -55,13 +55,25 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	panningIsActive = false;
 	panningButton = OF_MOUSE_BUTTON_LEFT;
 	panningKeyModifier = NONE;
+	panningReferencePointIsSet = false;
 	labelingIsActive = false;
 	labelingButton = OF_MOUSE_BUTTON_LEFT;
 	labelingKeyModifier = NONE;
-	mousePos = nullptr;
+	mousePosIsSet = false;
 	resetIsActive = false;
 	resetButton = OF_MOUSE_BUTTON_RIGHT;
 	resetKeyModifier = OF_KEY_CONTROL;
+	resetLimitsAreSet = false;
+	pressedKey = 0;
+	keyIsPressed = false;
+
+	// Add the event listeners
+	ofAddListener(ofEvents().mousePressed, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().mouseReleased, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().mouseDragged, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().mouseScrolled, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().keyPressed, this, &ofxGPlot::keyEventHandler, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().keyReleased, this, &ofxGPlot::keyEventHandler, OF_EVENT_ORDER_AFTER_APP);
 }
 
 void ofxGPlot::addLayer(const ofxGLayer& newLayer) {
@@ -802,8 +814,8 @@ void ofxGPlot::drawLabelsAt(float xScreen, float yScreen) const {
 }
 
 void ofxGPlot::drawLabels() const {
-	if (labelingIsActive && mousePos != nullptr) {
-		drawLabelsAt((*mousePos)[0], (*mousePos)[1]);
+	if (labelingIsActive && mousePosIsSet) {
+		drawLabelsAt(mousePos[0], mousePos[1]);
 	}
 }
 
@@ -1539,87 +1551,227 @@ ofxGHistogram& ofxGPlot::getHistogram(const string& layerId) {
 	return getLayer(layerId).getHistogram();
 }
 
-void activateZooming(float factor, int increaseButton, int decreaseButton, int increaseKeyModifier,
+void ofxGPlot::activateZooming(float factor, int increaseButton, int decreaseButton, int increaseKeyModifier,
 		int decreaseKeyModifier) {
-
+	zoomFactor = factor;
+	increaseZoomButton = increaseButton;
+	decreaseZoomButton = decreaseButton;
+	increaseZoomKeyModifier = increaseKeyModifier;
+	decreaseZoomKeyModifier = decreaseKeyModifier;
+	zoomingIsActive = true;
 }
 
-void activateZooming(float factor, int increaseButton, int decreaseButton) {
-
+void ofxGPlot::activateZooming(float factor, int increaseButton, int decreaseButton) {
+	activateZooming(factor, increaseButton, decreaseButton, NONE, NONE);
 }
 
-void activateZooming(float factor) {
-
+void ofxGPlot::activateZooming(float factor) {
+	activateZooming(factor, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, NONE, NONE);
 }
 
-void activateZooming() {
-
+void ofxGPlot::activateZooming() {
+	activateZooming(1.3, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, NONE, NONE);
 }
 
-void deactivateZooming() {
-
+void ofxGPlot::deactivateZooming() {
+	zoomingIsActive = false;
 }
 
-void activateCentering(int button, int keyModifier) {
-
+void ofxGPlot::activateCentering(int button, int keyModifier) {
+	centeringButton = button;
+	centeringKeyModifier = keyModifier;
+	centeringIsActive = true;
 }
 
-void activateCentering(int button) {
-
+void ofxGPlot::activateCentering(int button) {
+	activateCentering(button, NONE);
 }
 
-void activateCentering() {
-
+void ofxGPlot::activateCentering() {
+	activateCentering(OF_MOUSE_BUTTON_LEFT, NONE);
 }
 
-void deactivateCentering() {
-
+void ofxGPlot::deactivateCentering() {
+	centeringIsActive = false;
 }
 
-void activatePanning(int button, int keyModifier) {
-
+void ofxGPlot::activatePanning(int button, int keyModifier) {
+	panningButton = button;
+	panningKeyModifier = keyModifier;
+	panningIsActive = true;
 }
 
-void activatePanning(int button) {
-
+void ofxGPlot::activatePanning(int button) {
+	activatePanning(button, NONE);
 }
 
-void activatePanning() {
-
+void ofxGPlot::activatePanning() {
+	activatePanning(OF_MOUSE_BUTTON_LEFT, NONE);
 }
 
-void deactivatePanning() {
-
+void ofxGPlot::deactivatePanning() {
+	panningIsActive = false;
+	panningReferencePointIsSet = false;
 }
 
-void activatePointLabels(int button, int keyModifier) {
-
+void ofxGPlot::activatePointLabels(int button, int keyModifier) {
+	labelingButton = button;
+	labelingKeyModifier = keyModifier;
+	labelingIsActive = true;
 }
 
-void activatePointLabels(int button) {
-
+void ofxGPlot::activatePointLabels(int button) {
+	activatePointLabels(button, NONE);
 }
 
-void activatePointLabels() {
-
+void ofxGPlot::activatePointLabels() {
+	activatePointLabels(OF_MOUSE_BUTTON_LEFT, NONE);
 }
 
-void deactivatePointLabels() {
-
+void ofxGPlot::deactivatePointLabels() {
+	labelingIsActive = false;
+	mousePosIsSet = false;
 }
 
-void activateReset(int button, int keyModifier) {
-
+void ofxGPlot::activateReset(int button, int keyModifier) {
+	resetButton = button;
+	resetKeyModifier = keyModifier;
+	resetIsActive = true;
+	resetLimitsAreSet = false;
 }
 
-void activateReset(int button) {
-
+void ofxGPlot::activateReset(int button) {
+	activateReset(button, NONE);
 }
 
-void activateReset() {
-
+void ofxGPlot::activateReset() {
+	activateReset(OF_MOUSE_BUTTON_RIGHT, NONE);
 }
 
-void deactivateReset() {
+void ofxGPlot::deactivateReset() {
+	resetIsActive = false;
+	resetLimitsAreSet = false;
+}
 
+void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
+	if (zoomingIsActive || centeringIsActive || panningIsActive || labelingIsActive || resetIsActive) {
+		ofMouseEventArgs::Type eventType = args.type;
+		int button = args.button;
+		float xPos = args.x;
+		float yPos = args.y;
+		float wheelCounter = args.scrollY;
+
+		if (zoomingIsActive
+				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
+			if (button == increaseZoomButton
+					&& (increaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == increaseZoomKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					if (wheelCounter == 0 || (wheelCounter < 0 && increaseZoomButton == decreaseZoomButton)) {
+						zoom(zoomFactor, xPos, yPos);
+					}
+				}
+			}
+
+			if (button == decreaseZoomButton
+					&& (decreaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == decreaseZoomKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					if (wheelCounter == 0 || (wheelCounter > 0 && increaseZoomButton == decreaseZoomButton)) {
+						zoom(1 / zoomFactor, xPos, yPos);
+					}
+				}
+			}
+		}
+
+		if (centeringIsActive
+				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
+			if (button == centeringButton
+					&& (centeringKeyModifier == NONE || (keyIsPressed && pressedKey == centeringKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					center(xPos, yPos);
+				}
+			}
+		}
+
+		if (panningIsActive) {
+			if (button == panningButton
+					&& (panningKeyModifier == NONE || (keyIsPressed && pressedKey == panningKeyModifier))) {
+				if (eventType == ofMouseEventArgs::Type::Dragged) {
+					if (panningReferencePointIsSet) {
+						// Save the axes limits if it's the first mouse modification after the last reset
+						if (resetIsActive && !resetLimitsAreSet) {
+							xLimReset = xLim;
+							yLimReset = yLim;
+							resetLimitsAreSet = true;
+						}
+
+						align(panningReferencePoint, xPos, yPos);
+					} else if (isOverBox(xPos, yPos)) {
+						panningReferencePoint = getValueAt(xPos, yPos);
+						panningReferencePointIsSet = true;
+					}
+				} else if (eventType == ofMouseEventArgs::Type::Released) {
+					panningReferencePointIsSet = false;
+				}
+			}
+		}
+
+		if (labelingIsActive) {
+			if (button == labelingButton
+					&& (labelingKeyModifier == NONE || (keyIsPressed && pressedKey == labelingKeyModifier))) {
+				if ((eventType == ofMouseEventArgs::Type::Pressed || eventType == ofMouseEventArgs::Type::Dragged)
+						&& isOverBox(xPos, yPos)) {
+					mousePos = {xPos, yPos};
+					mousePosIsSet = true;
+				} else {
+					mousePosIsSet = false;
+				}
+			}
+		}
+
+		if (resetIsActive
+				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
+			if (button == resetButton
+					&& (resetKeyModifier == NONE || (keyIsPressed && pressedKey == resetKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					if (resetLimitsAreSet) {
+						setXLim(xLimReset);
+						setYLim(yLimReset);
+						resetLimitsAreSet = false;
+					}
+				}
+			}
+		}
+	}
+}
+
+void ofxGPlot::keyEventHandler(ofKeyEventArgs& args) {
+	if (zoomingIsActive || centeringIsActive || panningIsActive || labelingIsActive || resetIsActive) {
+		if (args.type == ofKeyEventArgs::Type::Pressed) {
+			pressedKey = args.key;
+			keyIsPressed = true;
+		} else if (args.type == ofKeyEventArgs::Type::Released) {
+			keyIsPressed = false;
+		}
+	}
 }

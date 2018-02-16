@@ -210,12 +210,13 @@ public:
 	void activateReset(int button);
 	void activateReset();
 	void deactivateReset();
-	//void mouseEvent(MouseEvent event);
 
 protected:
 	array<float, 2> calculatePlotXLim();
 	array<float, 2> calculatePlotYLim();
 	void shiftPlotPos(const array<float, 2>& valuePlotPos, const array<float, 2>& newPlotPos);
+	void mouseEventHandler(ofMouseEventArgs& args);
+	void keyEventHandler(ofKeyEventArgs& args);
 
 	// General properties
 	array<float, 2> pos;
@@ -266,13 +267,18 @@ protected:
 	int panningButton;
 	int panningKeyModifier;
 	array<float, 2> panningReferencePoint;
+	bool panningReferencePointIsSet;
 	bool labelingIsActive;
 	int labelingButton;
 	int labelingKeyModifier;
-	array<float, 2>* mousePos;
+	array<float, 2> mousePos;
+	bool mousePosIsSet;
 	bool resetIsActive;
 	int resetButton;
 	int resetKeyModifier;
 	array<float, 2> xLimReset;
 	array<float, 2> yLimReset;
+	bool resetLimitsAreSet;
+	int pressedKey;
+	bool keyIsPressed;
 };

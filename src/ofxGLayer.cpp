@@ -982,7 +982,7 @@ void ofxGLayer::drawLabel(const ofxGPoint& point) const {
 	if (isfinite(xPlot) && isfinite(yPlot)) {
 		float xLabelPos = xPlot + labelSeparation[0];
 		float yLabelPos = yPlot - labelSeparation[1];
-		float delta = fontSize / 4.0;
+		float delta = fontSize / 2.0;
 
 		ofRectangle bounds = font.getStringBoundingBox(point.getLabel(), 0, 0);
 
