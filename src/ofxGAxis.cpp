@@ -709,6 +709,11 @@ void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& ne
 	lab.setFontProperties(newFontName, newFontColor, newFontSize);
 }
 
+void ofxGAxis::setFontsMakeContours(bool makeContours) {
+	font.load(fontName, fontSize, true, true, makeContours);
+	lab.setFontMakeContours(makeContours);
+}
+
 vector<float> ofxGAxis::getTicks() const {
 	if (fixedTicks) {
 		return ticks;

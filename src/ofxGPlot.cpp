@@ -1421,6 +1421,20 @@ void ofxGPlot::setAllFontProperties(const string& fontName, const ofColor& fontC
 	}
 }
 
+void ofxGPlot::setFontsMakeContours(bool makeContours) {
+	xAxis.setFontsMakeContours(makeContours);
+	topAxis.setFontsMakeContours(makeContours);
+	yAxis.setFontsMakeContours(makeContours);
+	rightAxis.setFontsMakeContours(makeContours);
+	title.setFontMakeContours(makeContours);
+
+	mainLayer.setFontsMakeContours(makeContours);
+
+	for (ofxGLayer& layer : layerList) {
+		layer.setFontsMakeContours(makeContours);
+	}
+}
+
 array<float, 2> ofxGPlot::getPos() const {
 	return pos;
 }

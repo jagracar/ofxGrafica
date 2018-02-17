@@ -1485,6 +1485,14 @@ void ofxGLayer::setAllFontProperties(const string& newFontName, const ofColor& n
 	}
 }
 
+void ofxGLayer::setFontsMakeContours(bool makeContours) {
+	font.load(fontName, fontSize, true, true, makeContours);
+
+	if (histIsActive) {
+		hist.setFontMakeContours(makeContours);
+	}
+}
+
 string ofxGLayer::getId() const {
 	return id;
 }

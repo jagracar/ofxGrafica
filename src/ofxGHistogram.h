@@ -35,6 +35,7 @@ public:
 	void setFontColor(const ofColor& newFontColor);
 	void setFontSize(int newFontSize);
 	void setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize);
+	void setFontMakeContours(bool makeContours);
 
 protected:
 	// Update methods

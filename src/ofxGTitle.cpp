@@ -98,3 +98,7 @@ void ofxGTitle::setFontProperties(const string& newFontName, const ofColor& newF
 	fontSize = newFontSize;
 	font.load(fontName, fontSize);
 }
+
+void ofxGTitle::setFontMakeContours(bool makeContours) {
+	font.load(fontName, fontSize, true, true, makeContours);
+}

@@ -95,6 +95,7 @@ public:
 	void setFontSize(int newFontSize);
 	void setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize);
 	void setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize);
+	void setFontsMakeContours(bool makeContours);
 
 	// Getter methods
 	string getId() const;

@@ -225,3 +225,7 @@ void ofxGAxisLabel::setFontProperties(const string& newFontName, const ofColor& 
 	fontSize = newFontSize;
 	font.load(fontName, fontSize);
 }
+
+void ofxGAxisLabel::setFontMakeContours(bool makeContours) {
+	font.load(fontName, fontSize, true, true, makeContours);
+}

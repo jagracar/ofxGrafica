@@ -159,6 +159,7 @@ public:
 	void setFontSize(int fontSize);
 	void setFontProperties(const string& fontName, const ofColor& fontColor, int fontSize);
 	void setAllFontProperties(const string& fontName, const ofColor& fontColor, int fontSize);
+	void setFontsMakeContours(bool makeContours);
 
 	// Getter methods
 	array<float, 2> getPos() const;

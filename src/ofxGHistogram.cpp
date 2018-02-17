@@ -322,3 +322,7 @@ void ofxGHistogram::setFontProperties(const string& newFontName, const ofColor& 
 	fontSize = newFontSize;
 	font.load(fontName, fontSize);
 }
+
+void ofxGHistogram::setFontMakeContours(bool makeContours) {
+	font.load(fontName, fontSize, true, true, makeContours);
+}
