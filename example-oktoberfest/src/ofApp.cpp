@@ -55,6 +55,7 @@ void ofApp::setup() {
 	plot.activatePointLabels();
 }
 
+//--------------------------------------------------------------
 float ofApp::getExactDate(int year, int month, int day) {
 	bool leapYear = false;
 

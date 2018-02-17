@@ -42,13 +42,16 @@ void ofApp::setup() {
 	plot1.activatePanning();
 }
 
+//--------------------------------------------------------------
 float ofApp::celsiusToKelvin(float celsius) {
 	return 273.15 + celsius;
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-
+	// Change the second plot vertical scale from Celsius to Kelvin
+	array<float, 2> yLim = plot1.getYLim();
+	plot2.setYLim(celsiusToKelvin(yLim[0]), celsiusToKelvin(yLim[1]));
 }
 
 //--------------------------------------------------------------
@@ -62,10 +65,6 @@ void ofApp::draw() {
 	plot1.drawPoints();
 	plot1.drawLines();
 	plot1.endDraw();
-
-	// Change the second plot vertical scale from Celsius to Kelvin
-	array<float, 2> yLim = plot1.getYLim();
-	plot2.setYLim(celsiusToKelvin(yLim[0]), celsiusToKelvin(yLim[1]));
 
 	// Draw only the right axis
 	plot2.beginDraw();
