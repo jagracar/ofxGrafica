@@ -151,7 +151,7 @@ void ofxGLayer::updatePlotPoints() {
 
 float ofxGLayer::xPlotToValue(float xPlot) const {
 	if (xLog) {
-		return exp(log10(xLim[0]) + log10(xLim[1] / xLim[0]) * xPlot / dim[0]);
+		return pow(10, log10(xLim[0]) + log10(xLim[1] / xLim[0]) * xPlot / dim[0]);
 	} else {
 		return xLim[0] + (xLim[1] - xLim[0]) * xPlot / dim[0];
 	}
@@ -159,7 +159,7 @@ float ofxGLayer::xPlotToValue(float xPlot) const {
 
 float ofxGLayer::yPlotToValue(float yPlot) const {
 	if (yLog) {
-		return exp(log10(yLim[0]) - log10(yLim[1] / yLim[0]) * yPlot / dim[1]);
+		return pow(10, log10(yLim[0]) - log10(yLim[1] / yLim[0]) * yPlot / dim[1]);
 	} else {
 		return yLim[0] - (yLim[1] - yLim[0]) * yPlot / dim[1];
 	}
@@ -205,7 +205,7 @@ vector<ofxGPoint>::size_type ofxGLayer::getPointIndexAtPlotPos(float xPlot, floa
 			if (inside[i]) {
 				float distSq = pow(plotPoints[i].getX() - xPlot, 2) + pow(plotPoints[i].getY() - yPlot, 2);
 
-				if (distSq < max(pow(pointSizes[i % pointSizes.size()] / 2, 2), 25.0)) {
+				if (distSq < max(pow(pointSizes[i % pointSizes.size()], 2), 25.0)) {
 					if (distSq < minDistSq) {
 						minDistSq = distSq;
 						pointIndex = i;

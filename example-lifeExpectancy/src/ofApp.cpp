@@ -45,7 +45,7 @@ void ofApp::setup() {
 	plot.setPoints(points);
 	plot.setPointSizes(pointSizes);
 	plot.activatePointLabels();
-	plot.activatePanning(OF_MOUSE_BUTTON_RIGHT);
+	plot.activatePanning();
 	plot.activateZooming(1.1, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
 }
 
