@@ -24,7 +24,7 @@ void ofApp::setup() {
 	vector<ofxGPoint> points;
 
 	for (int i = 0; i < nPoints; i++) {
-		points.emplace_back(i, 30 + 10 * ofNoise(0.1 * i, 0));
+		points.emplace_back(i, 30 + 10 * ofNoise(0.1 * i));
 	}
 
 	// Set the points, the title and the axis labels

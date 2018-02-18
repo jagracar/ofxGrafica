@@ -199,7 +199,7 @@ vector<ofxGPoint>::size_type ofxGLayer::getPointIndexAtPlotPos(float xPlot, floa
 	vector<ofxGPoint>::size_type pointIndex = plotPoints.size();
 
 	if (isInside(xPlot, yPlot)) {
-		float minDistSq = 1000;
+		float minDistSq = 1000000;
 
 		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size(); ++i) {
 			if (inside[i]) {
@@ -498,7 +498,7 @@ void ofxGLayer::drawPoints(const ofImage& pointImg) const {
 
 	for (int i = 0; i < nPoints; ++i) {
 		if (inside[i]) {
-			pointImg.draw(plotPoints[i].getX() - imgWidth / 2, plotPoints[i].getY() + imgHeight / 2);
+			pointImg.draw(plotPoints[i].getX() - imgWidth / 2, plotPoints[i].getY() - imgHeight / 2);
 		}
 	}
 }
@@ -544,34 +544,37 @@ void ofxGLayer::drawPoint(const ofxGPoint& point, const ofImage& pointImg) const
 	float yPlot = valueToYPlot(point.getY());
 
 	if (isInside(xPlot, yPlot)) {
-		pointImg.draw(xPlot - pointImg.getWidth() / 2, yPlot + pointImg.getHeight() / 2);
+		pointImg.draw(xPlot - pointImg.getWidth() / 2, yPlot - pointImg.getHeight() / 2);
 	}
 }
 
 void ofxGLayer::drawLines() {
-	ofPushStyle();
-	ofSetColor(lineColor);
-	ofSetLineWidth(lineWidth);
+	if (plotPoints.size() > 1) {
+		ofPushStyle();
+		ofSetColor(lineColor);
+		ofSetLineWidth(lineWidth);
 
-	for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
-		if (inside[i] && inside[i + 1]) {
-			ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
-		} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
-			// At least one of the points is outside the inner region.
-			// Obtain the valid line box intersections
-			int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
+		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
+			if (inside[i] && inside[i + 1]) {
+				ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), plotPoints[i + 1].getX(),
+						plotPoints[i + 1].getY());
+			} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
+				// At least one of the points is outside the inner region.
+				// Obtain the valid line box intersections
+				int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
 
-			if (inside[i]) {
-				ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), cuts[0][0], cuts[0][1]);
-			} else if (inside[i + 1]) {
-				ofDrawLine(cuts[0][0], cuts[0][1], plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
-			} else if (nCuts >= 2) {
-				ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
+				if (inside[i]) {
+					ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), cuts[0][0], cuts[0][1]);
+				} else if (inside[i + 1]) {
+					ofDrawLine(cuts[0][0], cuts[0][1], plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
+				} else if (nCuts >= 2) {
+					ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
+				}
 			}
 		}
-	}
 
-	ofPopStyle();
+		ofPopStyle();
+	}
 }
 
 void ofxGLayer::drawLine(const ofxGPoint& point1, const ofxGPoint& point2, const ofColor& lc, float lw) {

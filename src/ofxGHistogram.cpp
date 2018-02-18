@@ -135,15 +135,15 @@ void ofxGHistogram::draw(const ofxGPoint& plotBasePoint) const {
 				if (abs(x2 - x1) > 2 * lineWidth && abs(y2 - y1) > 2 * lineWidth) {
 					ofFill();
 					ofSetColor(bgColors[i % bgColors.size()]);
-					ofDrawRectangle(x1, y1, x2, y2);
+					ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
 					ofNoFill();
 					ofSetColor(lineColors[i % lineColors.size()]);
-					ofDrawRectangle(x1, y1, x2, y2);
+					ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
 				} else if ((type == GRAFICA_VERTICAL_HISTOGRAM && x2 != x1 && !(y1 == y2 && (y1 == 0 || y1 == -dim[1])))
 						|| (type == GRAFICA_HORIZONTAL_HISTOGRAM && y2 != y1 && !(x1 == x2 && (x1 == 0 || x1 == dim[0])))) {
 					ofFill();
 					ofSetColor(bgColors[i % bgColors.size()]);
-					ofDrawRectangle(x1, y1, x2, y2);
+					ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
 					ofSetColor(lineColors[i % lineColors.size()]);
 					ofDrawLine(x1, y1, x1, y2);
 					ofDrawLine(x2, y1, x2, y2);
@@ -168,7 +168,7 @@ void ofxGHistogram::drawHistLabels() const {
 
 	if (type == GRAFICA_VERTICAL_HISTOGRAM) {
 		if (rotateLabels) {
-			for (ofxGPoint p : plotPoints) {
+			for (const ofxGPoint& p : plotPoints) {
 				if (p.isValid() && p.getX() >= 0 && p.getX() <= dim[0]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					ofPushMatrix();
@@ -179,7 +179,7 @@ void ofxGHistogram::drawHistLabels() const {
 				}
 			}
 		} else {
-			for (ofxGPoint p : plotPoints) {
+			for (const ofxGPoint& p : plotPoints) {
 				if (p.isValid() && p.getX() >= 0 && p.getX() <= dim[0]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					font.drawString(p.getLabel(), p.getX() - bounds.width / 2, labelsOffset + fontSize);
@@ -188,7 +188,7 @@ void ofxGHistogram::drawHistLabels() const {
 		}
 	} else {
 		if (rotateLabels) {
-			for (ofxGPoint p : plotPoints) {
+			for (const ofxGPoint& p : plotPoints) {
 				if (p.isValid() && -p.getY() >= 0 && -p.getY() <= dim[1]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					ofPushMatrix();
@@ -199,7 +199,7 @@ void ofxGHistogram::drawHistLabels() const {
 				}
 			}
 		} else {
-			for (ofxGPoint p : plotPoints) {
+			for (const ofxGPoint& p : plotPoints) {
 				if (p.isValid() && -p.getY() >= 0 && -p.getY() <= dim[1]) {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					font.drawString(p.getLabel(), -labelsOffset - bounds.width, p.getY() + fontSize / 2.0);
