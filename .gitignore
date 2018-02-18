@@ -54,6 +54,8 @@ ipch/
 .metadata
 local.properties
 .externalToolBuilders
+.settings
+.cproject
 
 # Codelite
 *.session
