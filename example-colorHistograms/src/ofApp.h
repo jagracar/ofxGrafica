@@ -20,5 +20,9 @@ public:
 	void gotMessage(ofMessage msg);
 
 	ofxGPlot plot1, plot2, plot3;
+	vector<ofxGPoint> redHistPoints, greenHistPoints, blueHistPoints;
 	ofImage img;
+	ofPoint imgPos;
+	ofRectangle rect;
+	void calculateHistograms();
 };

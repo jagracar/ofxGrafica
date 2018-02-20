@@ -5,38 +5,19 @@
 void ofApp::setup() {
 	ofSetBackgroundColor(255);
 
-	// Load the image
+	// Load the image and set the image position
 	img.load("picture.jpg");
+	imgPos = ofPoint(410, 100);
+
+	// Set the rectangle position and size
+	rect.set(imgPos, 20, 20);
 
 	// Calculate the color histograms
-	int delta = 2;
-	int nBins = 255 / delta;
-	vector<float> redHist(nBins, 0);
-	vector<float> greenHist(nBins, 0);
-	vector<float> blueHist(nBins, 0);
-
-	for (int x = 0; x < img.getWidth(); ++x) {
-		for (int y = 0; y < img.getHeight(); ++y) {
-			ofColor c = img.getColor(x, y);
-			++redHist[c.r / delta];
-			++greenHist[c.g / delta];
-			++blueHist[c.b / delta];
-		}
-	}
-
-	// Calculate the plot points
-	vector<ofxGPoint> redHistPoints, greenHistPoints, blueHistPoints;
-	int nPixels = img.getWidth() * img.getWidth();
-
-	for (int i = 0; i < nBins; ++i) {
-		redHistPoints.emplace_back((i + 0.5) * delta, redHist[i] / nPixels);
-		greenHistPoints.emplace_back((i + 0.5) * delta, greenHist[i] / nPixels);
-		blueHistPoints.emplace_back((i + 0.5) * delta, blueHist[i] / nPixels);
-	}
+	calculateHistograms();
 
 	// Setup for the first plot
 	plot1.setPos(0, 0);
-	plot1.setDim(250, 200);
+	plot1.setDim(300, 200);
 	plot1.setXLim(0, 255);
 	plot1.setTitleText("Color histograms");
 	plot1.getYAxis().getAxisLabel().setText("N");
@@ -46,13 +27,12 @@ void ofApp::setup() {
 	plot1.getHistogram().setBgColors( { ofColor(255, 0, 0, 100) });
 	plot1.getHistogram().setLineColors( { ofColor(0, 0) });
 	plot1.getHistogram().setSeparations( { 0 });
-	plot1.activatePanning();
 	plot1.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
 	plot1.activateReset();
 
 	// Setup for the second plot
 	plot2.setPos(0, 245);
-	plot2.setDim(250, 200);
+	plot2.setDim(300, 200);
 	plot2.setXLim(0, 255);
 	plot2.getYAxis().getAxisLabel().setText("N");
 	plot2.getYAxis().getAxisLabel().setRotate(false);
@@ -61,13 +41,12 @@ void ofApp::setup() {
 	plot2.getHistogram().setBgColors( { ofColor(0, 255, 0, 100) });
 	plot2.getHistogram().setLineColors( { ofColor(0, 0) });
 	plot2.getHistogram().setSeparations( { 0 });
-	plot2.activatePanning();
 	plot2.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
 	plot2.activateReset();
 
 	// Setup for the third plot
 	plot3.setPos(0, 490);
-	plot3.setDim(250, 200);
+	plot3.setDim(300, 200);
 	plot3.setXLim(0, 255);
 	plot3.getXAxis().getAxisLabel().setText("color value");
 	plot3.getYAxis().getAxisLabel().setText("N");
@@ -77,9 +56,44 @@ void ofApp::setup() {
 	plot3.getHistogram().setBgColors( { ofColor(0, 0, 255, 100) });
 	plot3.getHistogram().setLineColors( { ofColor(0, 0) });
 	plot3.getHistogram().setSeparations( { 0 });
-	plot3.activatePanning();
 	plot3.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
 	plot3.activateReset();
+}
+
+//--------------------------------------------------------------
+void ofApp::calculateHistograms() {
+	// Calculate the color histograms
+	int delta = 2;
+	int nBins = 255 / delta;
+	vector<float> redHist(nBins, 0);
+	vector<float> greenHist(nBins, 0);
+	vector<float> blueHist(nBins, 0);
+	int xStart = ofClamp(rect.getX() - imgPos.x, 0, img.getWidth());
+	int yStart = ofClamp(rect.getY() - imgPos.y, 0, img.getHeight());
+	int xEnd = ofClamp(rect.getX() + rect.getWidth() - imgPos.x, 0, img.getWidth());
+	int yEnd = ofClamp(rect.getY() + rect.getHeight() - imgPos.y, 0, img.getHeight());
+	int counter = 0;
+
+	for (int x = xStart; x < xEnd; ++x) {
+		for (int y = yStart; y < yEnd; ++y) {
+			ofColor c = img.getColor(x, y);
+			++redHist[c.r / delta];
+			++greenHist[c.g / delta];
+			++blueHist[c.b / delta];
+			++counter;
+		}
+	}
+
+	// Calculate the plot points
+	redHistPoints.clear();
+	greenHistPoints.clear();
+	blueHistPoints.clear();
+
+	for (int i = 0; i < nBins; ++i) {
+		redHistPoints.emplace_back((i + 0.5) * delta, redHist[i] / counter);
+		greenHistPoints.emplace_back((i + 0.5) * delta, greenHist[i] / counter);
+		blueHistPoints.emplace_back((i + 0.5) * delta, blueHist[i] / counter);
+	}
 }
 
 //--------------------------------------------------------------
@@ -118,7 +132,14 @@ void ofApp::draw() {
 	plot3.endDraw();
 
 	// Draw the image
-	img.draw(390, 100);
+	img.draw(imgPos);
+
+	// Draw the square
+	ofPushStyle();
+	ofNoFill();
+	ofSetColor(0, 255, 0);
+	ofDrawRectangle(rect);
+	ofPopStyle();
 }
 
 //--------------------------------------------------------------
@@ -138,7 +159,17 @@ void ofApp::mouseMoved(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
+	// Center the rectangle on the mouse position
+	rect.setX(x - rect.getWidth() / 2);
+	rect.setY(y - rect.getHeight() / 2);
 
+	// Calculate the color histograms
+	calculateHistograms();
+
+	// Update the plots
+	plot1.setPoints(redHistPoints);
+	plot2.setPoints(greenHistPoints);
+	plot3.setPoints(blueHistPoints);
 }
 
 //--------------------------------------------------------------
