@@ -62,7 +62,7 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	mousePosIsSet = false;
 	resetIsActive = false;
 	resetButton = OF_MOUSE_BUTTON_RIGHT;
-	resetKeyModifier = OF_KEY_CONTROL;
+	resetKeyModifier = OF_KEY_LEFT_CONTROL;
 	resetLimitsAreSet = false;
 	pressedKey = 0;
 	keyIsPressed = false;
@@ -1675,57 +1675,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 		float yPos = args.y;
 		float wheelCounter = args.scrollY;
 
-		if (zoomingIsActive
-				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
-			if (button == increaseZoomButton
-					&& (increaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == increaseZoomKeyModifier))) {
-				if (isOverBox(xPos, yPos)) {
-					// Save the axes limits if it's the first mouse modification after the last reset
-					if (resetIsActive && !resetLimitsAreSet) {
-						xLimReset = xLim;
-						yLimReset = yLim;
-						resetLimitsAreSet = true;
-					}
-
-					if (wheelCounter == 0 || (wheelCounter < 0 && increaseZoomButton == decreaseZoomButton)) {
-						zoom(zoomFactor, xPos, yPos);
-					}
-				}
-			}
-
-			if (button == decreaseZoomButton
-					&& (decreaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == decreaseZoomKeyModifier))) {
-				if (isOverBox(xPos, yPos)) {
-					// Save the axes limits if it's the first mouse modification after the last reset
-					if (resetIsActive && !resetLimitsAreSet) {
-						xLimReset = xLim;
-						yLimReset = yLim;
-						resetLimitsAreSet = true;
-					}
-
-					if (wheelCounter == 0 || (wheelCounter > 0 && increaseZoomButton == decreaseZoomButton)) {
-						zoom(1 / zoomFactor, xPos, yPos);
-					}
-				}
-			}
-		}
-
-		if (centeringIsActive
-				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
-			if (button == centeringButton
-					&& (centeringKeyModifier == NONE || (keyIsPressed && pressedKey == centeringKeyModifier))) {
-				if (isOverBox(xPos, yPos)) {
-					// Save the axes limits if it's the first mouse modification after the last reset
-					if (resetIsActive && !resetLimitsAreSet) {
-						xLimReset = xLim;
-						yLimReset = yLim;
-						resetLimitsAreSet = true;
-					}
-
-					center(xPos, yPos);
-				}
-			}
-		}
+		bool finishedPanning = false;
+		bool finishedZoom = false;
 
 		if (panningIsActive) {
 			if (button == panningButton
@@ -1746,6 +1697,61 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 					}
 				} else if (eventType == ofMouseEventArgs::Type::Released) {
 					panningReferencePointIsSet = false;
+					finishedPanning = true;
+				}
+			}
+		}
+
+		if (zoomingIsActive && !finishedPanning
+				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
+			if (button == increaseZoomButton
+					&& (increaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == increaseZoomKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					if (wheelCounter == 0 || (wheelCounter < 0 && increaseZoomButton == decreaseZoomButton)) {
+						zoom(zoomFactor, xPos, yPos);
+						finishedZoom = true;
+					}
+				}
+			}
+
+			if (button == decreaseZoomButton
+					&& (decreaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == decreaseZoomKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					if (wheelCounter == 0 || (wheelCounter > 0 && increaseZoomButton == decreaseZoomButton)) {
+						zoom(1 / zoomFactor, xPos, yPos);
+						finishedZoom = true;
+					}
+				}
+			}
+		}
+
+		if (centeringIsActive && !finishedPanning && !finishedZoom
+				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
+			if (button == centeringButton
+					&& (centeringKeyModifier == NONE || (keyIsPressed && pressedKey == centeringKeyModifier))) {
+				if (isOverBox(xPos, yPos)) {
+					// Save the axes limits if it's the first mouse modification after the last reset
+					if (resetIsActive && !resetLimitsAreSet) {
+						xLimReset = xLim;
+						yLimReset = yLim;
+						resetLimitsAreSet = true;
+					}
+
+					center(xPos, yPos);
 				}
 			}
 		}

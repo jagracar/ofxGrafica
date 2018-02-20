@@ -48,6 +48,7 @@ void ofApp::setup() {
 	plot1.getHistogram().setSeparations( { 0 });
 	plot1.activatePanning();
 	plot1.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
+	plot1.activateReset();
 
 	// Setup for the second plot
 	plot2.setPos(0, 245);
@@ -62,6 +63,7 @@ void ofApp::setup() {
 	plot2.getHistogram().setSeparations( { 0 });
 	plot2.activatePanning();
 	plot2.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
+	plot2.activateReset();
 
 	// Setup for the third plot
 	plot3.setPos(0, 490);
@@ -77,6 +79,7 @@ void ofApp::setup() {
 	plot3.getHistogram().setSeparations( { 0 });
 	plot3.activatePanning();
 	plot3.activateZooming(1.2, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_LEFT);
+	plot3.activateReset();
 }
 
 //--------------------------------------------------------------
@@ -92,6 +95,7 @@ void ofApp::draw() {
 	plot1.drawTitle();
 	plot1.drawXAxis();
 	plot1.drawYAxis();
+	plot1.drawGridLines(GRAFICA_VERTICAL_DIRECTION);
 	plot1.drawHistograms();
 	plot1.endDraw();
 
@@ -100,6 +104,7 @@ void ofApp::draw() {
 	plot2.drawBox();
 	plot2.drawXAxis();
 	plot2.drawYAxis();
+	plot2.drawGridLines(GRAFICA_VERTICAL_DIRECTION);
 	plot2.drawHistograms();
 	plot2.endDraw();
 
@@ -108,6 +113,7 @@ void ofApp::draw() {
 	plot3.drawBox();
 	plot3.drawXAxis();
 	plot3.drawYAxis();
+	plot3.drawGridLines(GRAFICA_VERTICAL_DIRECTION);
 	plot3.drawHistograms();
 	plot3.endDraw();
 
