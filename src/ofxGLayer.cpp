@@ -29,7 +29,7 @@ ofxGLayer::ofxGLayer(const string& _id, const array<float, 2>& _dim, const array
 	labelSeparation = {7, 7};
 
 	// Font properties
-	fontName = "SansSerif.ttf";
+	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
 	font.load(fontName, fontSize);

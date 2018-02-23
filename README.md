@@ -30,8 +30,3 @@ Compatibility
 ------------
 
 Tested with openFrameworks v0.9.8 linux64.
-
-Known issues
-------------
-
-The addon is still under heavy developement.

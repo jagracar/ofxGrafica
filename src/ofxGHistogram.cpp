@@ -18,7 +18,7 @@ ofxGHistogram::ofxGHistogram(ofxGHistogramType _type, const array<float, 2>& _di
 	rotateLabels = false;
 
 	// Font properties
-	fontName = "SansSerif.plain";
+	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
 	font.load(fontName, fontSize);

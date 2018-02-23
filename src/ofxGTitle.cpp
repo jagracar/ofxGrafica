@@ -11,10 +11,11 @@ ofxGTitle::ofxGTitle(const array<float, 2>& _dim, const string& _text) :
 
 	// Font properties
 	textAlignment = GRAFICA_CENTER_ALIGN;
-	fontName = "SansSerif.rtt";
+	fontName = OF_TTF_SANS;
 	fontColor = ofColor(100);
 	fontSize = 10;
-	font.load(fontName, fontSize);
+	fontMakeContours = false;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGTitle::draw() const {
@@ -72,7 +73,7 @@ void ofxGTitle::setTextAlignment(ofxGTextAlignment newTextAlignment) {
 
 void ofxGTitle::setFontName(const string& newFontName) {
 	fontName = newFontName;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGTitle::setFontColor(const ofColor& newFontColor) {
@@ -85,7 +86,7 @@ void ofxGTitle::setFontSize(int newFontSize) {
 	}
 
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGTitle::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -96,9 +97,10 @@ void ofxGTitle::setFontProperties(const string& newFontName, const ofColor& newF
 	fontName = newFontName;
 	fontColor = newFontColor;
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
-void ofxGTitle::setFontMakeContours(bool makeContours) {
-	font.load(fontName, fontSize, true, true, makeContours);
+void ofxGTitle::setFontMakeContours(bool newFontMakeContours) {
+	fontMakeContours = newFontMakeContours;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }

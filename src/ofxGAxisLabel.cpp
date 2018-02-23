@@ -12,10 +12,11 @@ ofxGAxisLabel::ofxGAxisLabel(ofxGAxisType _type, const array<float, 2>& _dim, co
 
 	// Font properties
 	textAlignment = GRAFICA_CENTER_ALIGN;
-	fontName = "SansSerif.ttf";
+	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 10;
-	font.load(fontName, fontSize);
+	fontMakeContours = false;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxisLabel::draw() const {
@@ -199,7 +200,7 @@ void ofxGAxisLabel::setTextAlignment(ofxGTextAlignment newTextAlignment) {
 
 void ofxGAxisLabel::setFontName(const string& newFontName) {
 	fontName = newFontName;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxisLabel::setFontColor(const ofColor& newFontColor) {
@@ -212,7 +213,7 @@ void ofxGAxisLabel::setFontSize(int newFontSize) {
 	}
 
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxisLabel::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -223,9 +224,10 @@ void ofxGAxisLabel::setFontProperties(const string& newFontName, const ofColor& 
 	fontName = newFontName;
 	fontColor = newFontColor;
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
-void ofxGAxisLabel::setFontMakeContours(bool makeContours) {
-	font.load(fontName, fontSize, true, true, makeContours);
+void ofxGAxisLabel::setFontMakeContours(bool newFontMakeContours) {
+	fontMakeContours = newFontMakeContours;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }

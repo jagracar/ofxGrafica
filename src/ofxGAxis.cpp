@@ -31,7 +31,7 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<
 	drawAxisLabel = true;
 
 	// Font properties
-	fontName = "SansSerif.ttf";
+	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
 	font.load(fontName, fontSize);
