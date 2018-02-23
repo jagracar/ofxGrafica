@@ -419,7 +419,7 @@ int ofxGLayer::removePointFromCuts(array<array<float, 2>, 4>& cuts, int nCuts, c
 
 void ofxGLayer::startHistogram(ofxGHistogramType histType) {
 	hist = ofxGHistogram(histType, dim, plotPoints);
-	histIsActive = True;
+	histIsActive = true;
 }
 
 void ofxGLayer::stopHistogram() {
