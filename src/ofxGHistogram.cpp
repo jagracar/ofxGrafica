@@ -21,7 +21,8 @@ ofxGHistogram::ofxGHistogram(ofxGHistogramType _type, const array<float, 2>& _di
 	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
-	font.load(fontName, fontSize);
+	fontMakeContours = false;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 
 	// Update the histogram containers
 	updateArrays();
@@ -69,8 +70,8 @@ void ofxGHistogram::updateArrays() {
 			rightSides.push_back(differences[i]);
 		}
 
-		leftSides.push_back(differences[nPoints - 2]);
-		rightSides.push_back(differences[nPoints - 2]);
+		leftSides.push_back(differences.back());
+		rightSides.push_back(differences.back());
 	}
 }
 
@@ -104,29 +105,10 @@ void ofxGHistogram::draw(const ofxGPoint& plotBasePoint) const {
 					y2 = plotPoints[i].getY() + rightSides[i];
 				}
 
-				if (x1 < 0) {
-					x1 = 0;
-				} else if (x1 > dim[0]) {
-					x1 = dim[0];
-				}
-
-				if (-y1 < 0) {
-					y1 = 0;
-				} else if (-y1 > dim[1]) {
-					y1 = -dim[1];
-				}
-
-				if (x2 < 0) {
-					x2 = 0;
-				} else if (x2 > dim[0]) {
-					x2 = dim[0];
-				}
-
-				if (-y2 < 0) {
-					y2 = 0;
-				} else if (-y2 > dim[1]) {
-					y2 = -dim[1];
-				}
+				x1 = ofClamp(x1, 0, dim[0]);
+				x2 = ofClamp(x2, 0, dim[0]);
+				y1 = -ofClamp(-y1, 0, dim[1]);
+				y2 = -ofClamp(-y2, 0, dim[1]);
 
 				// Draw the rectangle
 				float lineWidth = lineWidths[i % lineWidths.size()];
@@ -296,7 +278,7 @@ void ofxGHistogram::setRotateLabels(bool newRotateLabels) {
 
 void ofxGHistogram::setFontName(const string& newFontName) {
 	fontName = newFontName;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGHistogram::setFontColor(const ofColor& newFontColor) {
@@ -309,7 +291,7 @@ void ofxGHistogram::setFontSize(int newFontSize) {
 	}
 
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGHistogram::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -320,9 +302,10 @@ void ofxGHistogram::setFontProperties(const string& newFontName, const ofColor& 
 	fontName = newFontName;
 	fontColor = newFontColor;
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
-void ofxGHistogram::setFontMakeContours(bool makeContours) {
-	font.load(fontName, fontSize, true, true, makeContours);
+void ofxGHistogram::setFontMakeContours(bool newFontMakeContours) {
+	fontMakeContours = newFontMakeContours;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
