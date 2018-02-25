@@ -111,13 +111,26 @@ void ofxGHistogram::draw(const ofxGPoint& plotBasePoint) const {
 				y2 = -ofClamp(-y2, 0, dim[1]);
 
 				// Draw the rectangle
-				ofFill();
-				ofSetColor(bgColors[i % bgColors.size()]);
-				ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
-				ofNoFill();
-				ofSetLineWidth(lineWidths[i % lineWidths.size()]);
-				ofSetColor(lineColors[i % lineColors.size()]);
-				ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
+				float lineWidth = lineWidths[i % lineWidths.size()];
+				bool cond = abs(x2 - x1) > 2 * lineWidth && abs(y2 - y1) > 2 * lineWidth;
+				cond =
+						cond
+								|| (type == GRAFICA_VERTICAL_HISTOGRAM && x2 != x1
+										&& !(y1 == y2 && (y1 == 0 || y1 == -dim[1])));
+				cond =
+						cond
+								|| (type == GRAFICA_HORIZONTAL_HISTOGRAM && y2 != y1
+										&& !(x1 == x2 && (x1 == 0 || x1 == dim[0])));
+
+				if (cond) {
+					ofFill();
+					ofSetColor(bgColors[i % bgColors.size()]);
+					ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
+					ofNoFill();
+					ofSetLineWidth(lineWidth);
+					ofSetColor(lineColors[i % lineColors.size()]);
+					ofDrawRectangle(x1, y1, x2 - x1, y2 - y1);
+				}
 			}
 		}
 
