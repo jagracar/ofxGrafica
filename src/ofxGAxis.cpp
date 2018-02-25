@@ -34,7 +34,8 @@ ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<
 	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
-	font.load(fontName, fontSize);
+	fontMakeContours = false;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 
 	// Update the tick containers
 	updateTicks();
@@ -677,7 +678,7 @@ void ofxGAxis::setAxisLabelText(const string& text) {
 
 void ofxGAxis::setFontName(const string& newFontName) {
 	fontName = newFontName;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxis::setFontColor(const ofColor& newFontColor) {
@@ -690,7 +691,7 @@ void ofxGAxis::setFontSize(int newFontSize) {
 	}
 
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxis::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -701,7 +702,7 @@ void ofxGAxis::setFontProperties(const string& newFontName, const ofColor& newFo
 	fontName = newFontName;
 	fontColor = newFontColor;
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -709,9 +710,10 @@ void ofxGAxis::setAllFontProperties(const string& newFontName, const ofColor& ne
 	lab.setFontProperties(newFontName, newFontColor, newFontSize);
 }
 
-void ofxGAxis::setFontsMakeContours(bool makeContours) {
-	font.load(fontName, fontSize, true, true, makeContours);
-	lab.setFontMakeContours(makeContours);
+void ofxGAxis::setFontsMakeContours(bool newFontMakeContours) {
+	fontMakeContours = newFontMakeContours;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
+	lab.setFontMakeContours(fontMakeContours);
 }
 
 vector<float> ofxGAxis::getTicks() const {
