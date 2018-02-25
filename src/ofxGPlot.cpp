@@ -466,6 +466,7 @@ void ofxGPlot::moveHorizontalAxesLim(float delta) {
 
 	// Fix the limits
 	fixedXLim = true;
+	fixedYLim = true;
 
 	// Move the horizontal axes
 	xAxis.moveLim(xLim);
@@ -488,6 +489,7 @@ void ofxGPlot::moveVerticalAxesLim(float delta) {
 	}
 
 	// Fix the limits
+	fixedXLim = true;
 	fixedYLim = true;
 
 	// Move the vertical axes
