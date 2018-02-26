@@ -18,17 +18,17 @@ public:
 	 * @param _type the axis type. It can be GRAFICA_X_AXIS, GRAFICA_Y_AXIS, GRAFICA_TOP_AXIS or GRAFICA_RIGHT_AXIS
 	 * @param _dim the plot box dimensions in pixels
 	 * @param _lim the limits
-	 * @param _log the axis scale. True if it's logarithmic
+	 * @param _logScale the axis scale. True if it's logarithmic
 	 */
 	ofxGAxis(ofxGAxisType _type = GRAFICA_X_AXIS, const array<float, 2>& _dim = { 100, 100 },
-			const array<float, 2>& _lim = { 0, 1 }, bool _log = false);
+			const array<float, 2>& _lim = { 0, 1 }, bool _logScale = false);
 
 	/**
 	 * @brief Moves the axis limits
 	 *
 	 * @param newLim the new axis limits
 	 */
-	void moveLim(array<float, 2>& newLim);
+	void moveLim(const array<float, 2>& newLim);
 
 	/**
 	 * @brief Draws the axis
@@ -61,16 +61,16 @@ public:
 	 * @brief Sets the axis limits and the axis scale
 	 *
 	 * @param newLim the new axis limits
-	 * @param newLog the new axis scale
+	 * @param newLogScale the new axis scale
 	 */
-	void setLimAndLog(const array<float, 2>& newLim, bool newLog);
+	void setLimAndLogScale(const array<float, 2>& newLim, bool newLogScale);
 
 	/**
 	 * @brief Sets the axis scale
 	 *
-	 * @param newLog the new axis scale
+	 * @param newLogScale the new axis scale
 	 */
-	void setLog(bool newLog);
+	void setLogScale(bool newLogScale);
 
 	/**
 	 * @brief Sets the axis offset with respect to the plot box
@@ -356,7 +356,7 @@ protected:
 	/**
 	 * @brief Defines if the scale should be logarithmic or not
 	 */
-	bool log;
+	bool logScale;
 
 	/**
 	 * @brief The axis offset with respect to the plot box

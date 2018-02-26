@@ -6,8 +6,6 @@
 #include "ofxGHistogram.h"
 #include "ofMain.h"
 
-const int ofxGPlot::NONE = -1;
-
 ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 		pos( { xPos, yPos }), outerDim( { plotWidth, plotHeight }) {
 	// General properties
@@ -47,18 +45,18 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	zoomFactor = 1.3;
 	increaseZoomButton = OF_MOUSE_BUTTON_LEFT;
 	decreaseZoomButton = OF_MOUSE_BUTTON_RIGHT;
-	increaseZoomKeyModifier = NONE;
-	decreaseZoomKeyModifier = NONE;
+	increaseZoomKeyModifier = GRAFICA_NONE_MODIFIER;
+	decreaseZoomKeyModifier = GRAFICA_NONE_MODIFIER;
 	centeringIsActive = false;
 	centeringButton = OF_MOUSE_BUTTON_LEFT;
-	centeringKeyModifier = NONE;
+	centeringKeyModifier = GRAFICA_NONE_MODIFIER;
 	panningIsActive = false;
 	panningButton = OF_MOUSE_BUTTON_LEFT;
-	panningKeyModifier = NONE;
+	panningKeyModifier = GRAFICA_NONE_MODIFIER;
 	panningReferencePointIsSet = false;
 	labelingIsActive = false;
 	labelingButton = OF_MOUSE_BUTTON_LEFT;
-	labelingKeyModifier = NONE;
+	labelingKeyModifier = GRAFICA_NONE_MODIFIER;
 	mousePosIsSet = false;
 	resetIsActive = false;
 	resetButton = OF_MOUSE_BUTTON_RIGHT;
@@ -871,7 +869,7 @@ void ofxGPlot::drawLegend(const vector<string>& text, const vector<float>& xRela
 	ofFill();
 	ofSetRectMode(OF_RECTMODE_CENTER);
 
-	for (vector<string>::size_type i = 0; i < text.size(); i++) {
+	for (vector<string>::size_type i = 0; i < text.size(); ++i) {
 		array<float, 2> plotPosition = { xRelativePos[i] * dim[0], -yRelativePos[i] * dim[1] };
 		array<float, 2> position = mainLayer.plotToValue(plotPosition[0], plotPosition[1]);
 
@@ -1079,10 +1077,10 @@ void ofxGPlot::setLogScale(const string& logType) {
 		}
 
 		// Update the axes
-		xAxis.setLimAndLog(xLim, xLog);
-		topAxis.setLimAndLog(xLim, xLog);
-		yAxis.setLimAndLog(yLim, yLog);
-		rightAxis.setLimAndLog(yLim, yLog);
+		xAxis.setLimAndLogScale(xLim, xLog);
+		topAxis.setLimAndLogScale(xLim, xLog);
+		yAxis.setLimAndLogScale(yLim, yLog);
+		rightAxis.setLimAndLogScale(yLim, yLog);
 
 		// Update the layers
 		mainLayer.setLimAndLog(xLim, yLim, xLog, yLog);
@@ -1578,15 +1576,15 @@ void ofxGPlot::activateZooming(float factor, int increaseButton, int decreaseBut
 }
 
 void ofxGPlot::activateZooming(float factor, int increaseButton, int decreaseButton) {
-	activateZooming(factor, increaseButton, decreaseButton, NONE, NONE);
+	activateZooming(factor, increaseButton, decreaseButton, GRAFICA_NONE_MODIFIER, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activateZooming(float factor) {
-	activateZooming(factor, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, NONE, NONE);
+	activateZooming(factor, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, GRAFICA_NONE_MODIFIER, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activateZooming() {
-	activateZooming(1.3, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, NONE, NONE);
+	activateZooming(1.3, OF_MOUSE_BUTTON_LEFT, OF_MOUSE_BUTTON_RIGHT, GRAFICA_NONE_MODIFIER, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::deactivateZooming() {
@@ -1600,11 +1598,11 @@ void ofxGPlot::activateCentering(int button, int keyModifier) {
 }
 
 void ofxGPlot::activateCentering(int button) {
-	activateCentering(button, NONE);
+	activateCentering(button, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activateCentering() {
-	activateCentering(OF_MOUSE_BUTTON_LEFT, NONE);
+	activateCentering(OF_MOUSE_BUTTON_LEFT, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::deactivateCentering() {
@@ -1618,11 +1616,11 @@ void ofxGPlot::activatePanning(int button, int keyModifier) {
 }
 
 void ofxGPlot::activatePanning(int button) {
-	activatePanning(button, NONE);
+	activatePanning(button, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activatePanning() {
-	activatePanning(OF_MOUSE_BUTTON_LEFT, NONE);
+	activatePanning(OF_MOUSE_BUTTON_LEFT, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::deactivatePanning() {
@@ -1637,11 +1635,11 @@ void ofxGPlot::activatePointLabels(int button, int keyModifier) {
 }
 
 void ofxGPlot::activatePointLabels(int button) {
-	activatePointLabels(button, NONE);
+	activatePointLabels(button, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activatePointLabels() {
-	activatePointLabels(OF_MOUSE_BUTTON_LEFT, NONE);
+	activatePointLabels(OF_MOUSE_BUTTON_LEFT, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::deactivatePointLabels() {
@@ -1657,11 +1655,11 @@ void ofxGPlot::activateReset(int button, int keyModifier) {
 }
 
 void ofxGPlot::activateReset(int button) {
-	activateReset(button, NONE);
+	activateReset(button, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::activateReset() {
-	activateReset(OF_MOUSE_BUTTON_RIGHT, NONE);
+	activateReset(OF_MOUSE_BUTTON_RIGHT, GRAFICA_NONE_MODIFIER);
 }
 
 void ofxGPlot::deactivateReset() {
@@ -1682,7 +1680,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 
 		if (panningIsActive) {
 			if (button == panningButton
-					&& (panningKeyModifier == NONE || (keyIsPressed && pressedKey == panningKeyModifier))) {
+					&& (panningKeyModifier == GRAFICA_NONE_MODIFIER
+							|| (keyIsPressed && pressedKey == panningKeyModifier))) {
 				if (eventType == ofMouseEventArgs::Type::Dragged) {
 					if (panningReferencePointIsSet) {
 						// Save the axes limits if it's the first mouse modification after the last reset
@@ -1707,7 +1706,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 		if (zoomingIsActive && !finishedPanning
 				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
 			if (button == increaseZoomButton
-					&& (increaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == increaseZoomKeyModifier))) {
+					&& (increaseZoomKeyModifier == GRAFICA_NONE_MODIFIER
+							|| (keyIsPressed && pressedKey == increaseZoomKeyModifier))) {
 				if (isOverBox(xPos, yPos)) {
 					// Save the axes limits if it's the first mouse modification after the last reset
 					if (resetIsActive && !resetLimitsAreSet) {
@@ -1724,7 +1724,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 			}
 
 			if (button == decreaseZoomButton
-					&& (decreaseZoomKeyModifier == NONE || (keyIsPressed && pressedKey == decreaseZoomKeyModifier))) {
+					&& (decreaseZoomKeyModifier == GRAFICA_NONE_MODIFIER
+							|| (keyIsPressed && pressedKey == decreaseZoomKeyModifier))) {
 				if (isOverBox(xPos, yPos)) {
 					// Save the axes limits if it's the first mouse modification after the last reset
 					if (resetIsActive && !resetLimitsAreSet) {
@@ -1744,7 +1745,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 		if (centeringIsActive && !finishedPanning && !finishedZoom
 				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
 			if (button == centeringButton
-					&& (centeringKeyModifier == NONE || (keyIsPressed && pressedKey == centeringKeyModifier))) {
+					&& (centeringKeyModifier == GRAFICA_NONE_MODIFIER
+							|| (keyIsPressed && pressedKey == centeringKeyModifier))) {
 				if (isOverBox(xPos, yPos)) {
 					// Save the axes limits if it's the first mouse modification after the last reset
 					if (resetIsActive && !resetLimitsAreSet) {
@@ -1760,7 +1762,8 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 
 		if (labelingIsActive) {
 			if (button == labelingButton
-					&& (labelingKeyModifier == NONE || (keyIsPressed && pressedKey == labelingKeyModifier))) {
+					&& (labelingKeyModifier == GRAFICA_NONE_MODIFIER
+							|| (keyIsPressed && pressedKey == labelingKeyModifier))) {
 				if ((eventType == ofMouseEventArgs::Type::Pressed || eventType == ofMouseEventArgs::Type::Dragged)
 						&& isOverBox(xPos, yPos)) {
 					mousePos = {xPos, yPos};
@@ -1774,7 +1777,7 @@ void ofxGPlot::mouseEventHandler(ofMouseEventArgs& args) {
 		if (resetIsActive
 				&& (eventType == ofMouseEventArgs::Type::Released || eventType == ofMouseEventArgs::Type::Scrolled)) {
 			if (button == resetButton
-					&& (resetKeyModifier == NONE || (keyIsPressed && pressedKey == resetKeyModifier))) {
+					&& (resetKeyModifier == GRAFICA_NONE_MODIFIER || (keyIsPressed && pressedKey == resetKeyModifier))) {
 				if (isOverBox(xPos, yPos)) {
 					if (resetLimitsAreSet) {
 						setXLim(xLimReset);

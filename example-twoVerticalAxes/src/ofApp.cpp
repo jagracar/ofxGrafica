@@ -23,7 +23,7 @@ void ofApp::setup() {
 	int nPoints = 50;
 	vector<ofxGPoint> points;
 
-	for (int i = 0; i < nPoints; i++) {
+	for (int i = 0; i < nPoints; ++i) {
 		points.emplace_back(i, 30 + 10 * ofNoise(0.1 * i));
 	}
 

@@ -3,10 +3,10 @@
 #include "ofxGAxisLabel.h"
 #include "ofMain.h"
 
-ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<float, 2>& _lim, bool _log) :
-		type(_type), dim(_dim), lim(_lim), log(_log) {
+ofxGAxis::ofxGAxis(ofxGAxisType _type, const array<float, 2>& _dim, const array<float, 2>& _lim, bool _logScale) :
+		type(_type), dim(_dim), lim(_lim), logScale(_logScale) {
 	// Do some sanity checks
-	if (log && (lim[0] <= 0 || lim[1] <= 0)) {
+	if (logScale && (lim[0] <= 0 || lim[1] <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -53,7 +53,7 @@ float ofxGAxis::roundPlus(float number, int sigDigits) {
 }
 
 void ofxGAxis::updateTicks() {
-	if (log) {
+	if (logScale) {
 		obtainLogarithmicTicks();
 	} else {
 		obtainLinearTicks();
@@ -134,7 +134,7 @@ void ofxGAxis::updatePlotTicks() {
 	float scaleFactor;
 	plotTicks.clear();
 
-	if (log) {
+	if (logScale) {
 		if (type == GRAFICA_X_AXIS || type == GRAFICA_TOP_AXIS) {
 			scaleFactor = dim[0] / log10(lim[1] / lim[0]);
 		} else {
@@ -175,7 +175,7 @@ void ofxGAxis::updateTickLabels() {
 	stringstream ss;
 	tickLabels.clear();
 
-	if (log) {
+	if (logScale) {
 		for (float tick : ticks) {
 			float logValue = log10(tick);
 			bool isExactLogValue = abs(logValue - round(logValue)) < 0.0001;
@@ -207,11 +207,11 @@ void ofxGAxis::updateTickLabels() {
 	}
 }
 
-void ofxGAxis::moveLim(array<float, 2>& newLim) {
+void ofxGAxis::moveLim(const array<float, 2>& newLim) {
 	// Check that the new limit makes sense
 	if (newLim[1] == newLim[0]) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+	} else if (logScale && (newLim[0] <= 0 || newLim[1] <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -222,7 +222,7 @@ void ofxGAxis::moveLim(array<float, 2>& newLim) {
 	if (!fixedTicks) {
 		int n = ticks.size();
 
-		if (log) {
+		if (logScale) {
 			obtainLogarithmicTicks();
 		} else if (n > 0) {
 			// Obtain the ticks precision and the tick separation
@@ -308,7 +308,7 @@ void ofxGAxis::drawAsXAxis() const {
 
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
-			if (log && tickLabels[i] == "") {
+			if (logScale && tickLabels[i] == "") {
 				ofDrawLine(plotTicks[i], offset, plotTicks[i], offset + smallTickLength);
 			} else {
 				ofDrawLine(plotTicks[i], offset, plotTicks[i], offset + tickLength);
@@ -317,9 +317,9 @@ void ofxGAxis::drawAsXAxis() const {
 	}
 
 	// Draw the tick labels
-	ofSetColor(fontColor);
-
 	if (drawTickLabels) {
+		ofSetColor(fontColor);
+
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
@@ -356,7 +356,7 @@ void ofxGAxis::drawAsYAxis() const {
 
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
-			if (log && tickLabels[i] == "") {
+			if (logScale && tickLabels[i] == "") {
 				ofDrawLine(-offset, plotTicks[i], -offset - smallTickLength, plotTicks[i]);
 			} else {
 				ofDrawLine(-offset, plotTicks[i], -offset - tickLength, plotTicks[i]);
@@ -365,9 +365,9 @@ void ofxGAxis::drawAsYAxis() const {
 	}
 
 	// Draw the tick labels
-	ofSetColor(fontColor);
-
 	if (drawTickLabels) {
+		ofSetColor(fontColor);
+
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
@@ -407,7 +407,7 @@ void ofxGAxis::drawAsTopAxis() const {
 
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
-			if (log && tickLabels[i] == "") {
+			if (logScale && tickLabels[i] == "") {
 				ofDrawLine(plotTicks[i], -offset, plotTicks[i], -offset - smallTickLength);
 			} else {
 				ofDrawLine(plotTicks[i], -offset, plotTicks[i], -offset - tickLength);
@@ -416,9 +416,9 @@ void ofxGAxis::drawAsTopAxis() const {
 	}
 
 	// Draw the tick labels
-	ofSetColor(fontColor);
-
 	if (drawTickLabels) {
+		ofSetColor(fontColor);
+
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
@@ -456,7 +456,7 @@ void ofxGAxis::drawAsRightAxis() const {
 
 	for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 		if (ticksInside[i]) {
-			if (log && tickLabels[i] == "") {
+			if (logScale && tickLabels[i] == "") {
 				ofDrawLine(offset, plotTicks[i], offset + smallTickLength, plotTicks[i]);
 			} else {
 				ofDrawLine(offset, plotTicks[i], offset + tickLength, plotTicks[i]);
@@ -465,9 +465,9 @@ void ofxGAxis::drawAsRightAxis() const {
 	}
 
 	// Draw the tick labels
-	ofSetColor(fontColor);
-
 	if (drawTickLabels) {
+		ofSetColor(fontColor);
+
 		if (rotateTickLabels) {
 			for (vector<float>::size_type i = 0; i < plotTicks.size(); ++i) {
 				if (ticksInside[i] && tickLabels[i] != "") {
@@ -512,7 +512,7 @@ void ofxGAxis::setLim(const array<float, 2>& newLim) {
 	// Check that the new limit makes sense
 	if (newLim[1] == newLim[0]) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (log && (newLim[0] <= 0 || newLim[1] <= 0)) {
+	} else if (logScale && (newLim[0] <= 0 || newLim[1] <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -527,16 +527,16 @@ void ofxGAxis::setLim(const array<float, 2>& newLim) {
 	updateTicksInside();
 }
 
-void ofxGAxis::setLimAndLog(const array<float, 2>& newLim, bool newLog) {
+void ofxGAxis::setLimAndLogScale(const array<float, 2>& newLim, bool newLogScale) {
 	// Check that the new limit makes sense
 	if (newLim[1] == newLim[0]) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (newLog && (newLim[0] <= 0 || newLim[1] <= 0)) {
+	} else if (newLogScale && (newLim[0] <= 0 || newLim[1] <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
 	lim = newLim;
-	log = newLog;
+	logScale = newLogScale;
 
 	if (!fixedTicks) {
 		updateTicks();
@@ -547,14 +547,14 @@ void ofxGAxis::setLimAndLog(const array<float, 2>& newLim, bool newLog) {
 	updateTicksInside();
 }
 
-void ofxGAxis::setLog(bool newLog) {
-	if (newLog != log) {
+void ofxGAxis::setLogScale(bool newLogScale) {
+	if (newLogScale != logScale) {
 		// Check if the old limits still make sense
-		if (newLog && (lim[0] <= 0 || lim[1] <= 0)) {
+		if (newLogScale && (lim[0] <= 0 || lim[1] <= 0)) {
 			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		}
 
-		log = newLog;
+		logScale = newLogScale;
 
 		if (!fixedTicks) {
 			updateTicks();
@@ -589,9 +589,9 @@ void ofxGAxis::setNTicks(int newNTicks) {
 
 	nTicks = newNTicks;
 	ticksSeparation = -1;
+	fixedTicks = false;
 
-	if (!log) {
-		fixedTicks = false;
+	if (!logScale) {
 		updateTicks();
 		updatePlotTicks();
 		updateTicksInside();
@@ -600,10 +600,10 @@ void ofxGAxis::setNTicks(int newNTicks) {
 }
 
 void ofxGAxis::setTicksSeparation(float newTicksSeparation) {
-	ticksSeparation = abs(newTicksSeparation);
+	ticksSeparation = newTicksSeparation;
+	fixedTicks = false;
 
-	if (!log) {
-		fixedTicks = false;
+	if (!logScale) {
 		updateTicks();
 		updatePlotTicks();
 		updateTicksInside();
@@ -612,8 +612,8 @@ void ofxGAxis::setTicksSeparation(float newTicksSeparation) {
 }
 
 void ofxGAxis::setTicks(const vector<float>& newTicks) {
-	fixedTicks = true;
 	ticks = newTicks;
+	fixedTicks = true;
 	updatePlotTicks();
 	updateTicksInside();
 	updateTickLabels();

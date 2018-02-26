@@ -3,7 +3,7 @@
 #include "ofMain.h"
 
 /**
- * @brief Point class.
+ * @brief Point class
  *
  * An ofxGPoint is composed of two coordinates (x, y) and a text label
  *

@@ -45,7 +45,7 @@ void ofApp::setup() {
 	vector<ofxGPoint> points3;
 	vector<ofxGPoint> points4;
 
-	for (int i = 0; i < nPoints; i++) {
+	for (int i = 0; i < nPoints; ++i) {
 		points1.emplace_back(sin(TWO_PI * i / (nPoints - 1)), cos(TWO_PI * i / (nPoints - 1)));
 		points2.emplace_back(i, cos(TWO_PI * i / (nPoints - 1)));
 		points3.emplace_back(sin(TWO_PI * i / (nPoints - 1)), i);

@@ -32,7 +32,8 @@ ofxGLayer::ofxGLayer(const string& _id, const array<float, 2>& _dim, const array
 	fontName = OF_TTF_SANS;
 	fontColor = ofColor(0);
 	fontSize = 8;
-	font.load(fontName, fontSize);
+	fontMakeContours = false;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 bool ofxGLayer::isId(const string& someId) const {
@@ -1449,7 +1450,7 @@ void ofxGLayer::setLabelSeparation(const array<float, 2>& newLabelSeparation) {
 
 void ofxGLayer::setFontName(const string& newFontName) {
 	fontName = newFontName;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGLayer::setFontColor(const ofColor& newFontColor) {
@@ -1462,7 +1463,7 @@ void ofxGLayer::setFontSize(int newFontSize) {
 	}
 
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGLayer::setFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -1473,7 +1474,7 @@ void ofxGLayer::setFontProperties(const string& newFontName, const ofColor& newF
 	fontName = newFontName;
 	fontColor = newFontColor;
 	fontSize = newFontSize;
-	font.load(fontName, fontSize);
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 }
 
 void ofxGLayer::setAllFontProperties(const string& newFontName, const ofColor& newFontColor, int newFontSize) {
@@ -1488,11 +1489,12 @@ void ofxGLayer::setAllFontProperties(const string& newFontName, const ofColor& n
 	}
 }
 
-void ofxGLayer::setFontsMakeContours(bool makeContours) {
-	font.load(fontName, fontSize, true, true, makeContours);
+void ofxGLayer::setFontsMakeContours(bool newFontMakeContours) {
+	fontMakeContours = newFontMakeContours;
+	font.load(fontName, fontSize, true, true, fontMakeContours);
 
 	if (histIsActive) {
-		hist.setFontMakeContours(makeContours);
+		hist.setFontMakeContours(fontMakeContours);
 	}
 }
 
