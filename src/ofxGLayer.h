@@ -22,12 +22,12 @@ public:
 	 * @param _dim the plot box dimensions in pixels
 	 * @param _xLim the horizontal limits
 	 * @param _yLim the vertical limits
-	 * @param _xLog the horizontal scale. True if it's logarithmic
-	 * @param _yLog the vertical scale. True if it's logarithmic
+	 * @param _xLogScale the horizontal scale. True if it's logarithmic
+	 * @param _yLogScale the vertical scale. True if it's logarithmic
 	 */
 	ofxGLayer(const string& _id = "defaultId", const array<float, 2>& _dim = { 100, 100 },
-			const array<float, 2>& _xLim = { 0, 1 }, const array<float, 2>& _yLim = { 0, 1 }, bool _xLog = false,
-			bool _yLog = false);
+			const array<float, 2>& _xLim = { 0, 1 }, const array<float, 2>& _yLim = { 0, 1 }, bool _xLogScale = false,
+			bool _yLogScale = false);
 
 	/**
 	 * @brief Checks if the layer's id is equal to a given id
@@ -80,7 +80,7 @@ public:
 	 *
 	 * @param pts the set of points
 	 *
-	 * @return a copy of the set of point with their positions transformed to the plot reference system
+	 * @return a copy of the set of points with their positions transformed to the plot reference system
 	 */
 	vector<ofxGPoint> valueToPlot(const vector<ofxGPoint>& pts) const;
 
@@ -128,7 +128,8 @@ public:
 	 * @param xPlot x position in the plot reference system
 	 * @param yPlot y position in the plot reference system
 	 *
-	 * @return the position index of closest point to the specified position. Returns -1 if there is no close point.
+	 * @return the position index of closest point to the specified position. Returns points array size if there is no
+	 * close point.
 	 */
 	vector<ofxGPoint>::size_type getPointIndexAtPlotPos(float xPlot, float yPlot) const;
 
@@ -145,7 +146,8 @@ public:
 	/**
 	 * @brief Initializes the histogram
 	 *
-	 * @param histType the type of histogram to use. It can be GRAFICA_VERTICAL_HISTOGRAM or GRAFICA_HORIZONTAL_HISTOGRAM
+	 * @param histType the type of histogram to use. It can be GRAFICA_VERTICAL_HISTOGRAM or
+	 * GRAFICA_HORIZONTAL_HISTOGRAM
 	 */
 	void startHistogram(ofxGHistogramType histType);
 
@@ -403,34 +405,35 @@ public:
 	 * @param xMax the maximum horizontal limit value
 	 * @param yMin the minimum vertical limit value
 	 * @param yMax the maximum vertical limit value
-	 * @param newXLog the new horizontal scale
-	 * @param newYLog the new vertical scale
+	 * @param newXLogScale the new horizontal scale
+	 * @param newYLogScale the new vertical scale
 	 */
-	void setLimAndLog(float xMin, float xMax, float yMin, float yMax, bool newXLog, bool newYLog);
+	void setLimAndLogScale(float xMin, float xMax, float yMin, float yMax, bool newXLogScale, bool newYLogScale);
 
 	/**
 	 * @brief Sets the horizontal and vertical limits and the horizontal and vertical scales
 	 *
 	 * @param newXLim the new horizontal limits
 	 * @param newYLim the new vertical limits
-	 * @param newXLog the new horizontal scale
-	 * @param newYLog the new vertical scale
+	 * @param newXLogScale the new horizontal scale
+	 * @param newYLogScale the new vertical scale
 	 */
-	void setLimAndLog(const array<float, 2>& newXLim, const array<float, 2>& newYLim, bool newXLog, bool newYLog);
+	void setLimAndLogScale(const array<float, 2>& newXLim, const array<float, 2>& newYLim, bool newXLogScale,
+			bool newYLogScale);
 
 	/**
 	 * @brief Sets the horizontal scale
 	 *
-	 * @param newXLog the new horizontal scale
+	 * @param newXLogScale the new horizontal scale
 	 */
-	void setXLog(bool newXLog);
+	void setXLogScale(bool newXLogScale);
 
 	/**
 	 * @brief Sets the vertical scale
 	 *
-	 * @param newYLog the new vertical scale
+	 * @param newYLogScale the new vertical scale
 	 */
-	void setYLog(bool newYLog);
+	void setYLogScale(bool newYLogScale);
 
 	/**
 	 * @brief Sets the layer points
@@ -701,14 +704,14 @@ public:
 	 *
 	 * @return the layer horizontal scale
 	 */
-	bool getXLog() const;
+	bool getXLogScale() const;
 
 	/**
 	 * @brief Returns the layer vertical scale
 	 *
 	 * @return the layer vertical scale
 	 */
-	bool getYLog() const;
+	bool getYLogScale() const;
 
 	/**
 	 * @brief Returns a copy of the layer points
@@ -876,12 +879,12 @@ protected:
 	/**
 	 * @brief Defines if the horizontal scale is logarithmic or not
 	 */
-	bool xLog;
+	bool xLogScale;
 
 	/**
 	 * @brief Defines if the vertical scale is logarithmic or not
 	 */
-	bool yLog;
+	bool yLogScale;
 
 	/**
 	 * @brief The layer points

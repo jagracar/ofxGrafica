@@ -1153,14 +1153,14 @@ public:
 	 *
 	 * @return true, if the horizontal axes scale is logarithmic
 	 */
-	bool getXLog() const;
+	bool getXLogScale() const;
 
 	/**
 	 * @brief Returns true if the vertical axes scale is logarithmic
 	 *
 	 * @return true, if the vertical axes scale is logarithmic
 	 */
-	bool getYLog() const;
+	bool getYLogScale() const;
 
 	/**
 	 * @brief Returns true if the horizontal axes limits are inverted
@@ -1518,12 +1518,12 @@ protected:
 	/**
 	 * @brief Defines if the horizontal axes scale is logarithmic
 	 */
-	bool xLog;
+	bool xLogScale;
 
 	/**
 	 * @brief Defines if the vertical axes scale is logarithmic
 	 */
-	bool yLog;
+	bool yLogScale;
 
 	/**
 	 * @brief Defines if the horizontal axes limits are inverted

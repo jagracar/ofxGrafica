@@ -5,10 +5,10 @@
 #include "ofMain.h"
 
 ofxGLayer::ofxGLayer(const string& _id, const array<float, 2>& _dim, const array<float, 2>& _xLim,
-		const array<float, 2>& _yLim, bool _xLog, bool _yLog) :
-		id(_id), dim(_dim), xLim(_xLim), yLim(_yLim), xLog(_xLog), yLog(_yLog) {
+		const array<float, 2>& _yLim, bool _xLogScale, bool _yLogScale) :
+		id(_id), dim(_dim), xLim(_xLim), yLim(_yLim), xLogScale(_xLogScale), yLogScale(_yLogScale) {
 	// Do some sanity checks
-	if ((xLog && (xLim[0] <= 0 || xLim[1] <= 0)) || (yLog && (yLim[0] <= 0 || yLim[1] <= 0))) {
+	if ((xLogScale && (xLim[0] <= 0 || xLim[1] <= 0)) || (yLogScale && (yLim[0] <= 0 || yLim[1] <= 0))) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -41,7 +41,7 @@ bool ofxGLayer::isId(const string& someId) const {
 }
 
 float ofxGLayer::valueToXPlot(float x) const {
-	if (xLog) {
+	if (xLogScale) {
 		return dim[0] * log10(x / xLim[0]) / log10(xLim[1] / xLim[0]);
 	} else {
 		return dim[0] * (x - xLim[0]) / (xLim[1] - xLim[0]);
@@ -49,7 +49,7 @@ float ofxGLayer::valueToXPlot(float x) const {
 }
 
 float ofxGLayer::valueToYPlot(float y) const {
-	if (yLog) {
+	if (yLogScale) {
 		return -dim[1] * log(y / yLim[0]) / log(yLim[1] / yLim[0]);
 	} else {
 		return -dim[1] * (y - yLim[0]) / (yLim[1] - yLim[0]);
@@ -67,7 +67,7 @@ ofxGPoint ofxGLayer::valueToPlot(const ofxGPoint& point) const {
 vector<ofxGPoint> ofxGLayer::valueToPlot(const vector<ofxGPoint>& pts) const {
 	vector<ofxGPoint> plotPts;
 
-	if (xLog && yLog) {
+	if (xLogScale && yLogScale) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
@@ -76,7 +76,7 @@ vector<ofxGPoint> ofxGLayer::valueToPlot(const vector<ofxGPoint>& pts) const {
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
 			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
-	} else if (xLog) {
+	} else if (xLogScale) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
@@ -85,7 +85,7 @@ vector<ofxGPoint> ofxGLayer::valueToPlot(const vector<ofxGPoint>& pts) const {
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
 			plotPts.emplace_back(xPlot, yPlot, p.getLabel());
 		}
-	} else if (yLog) {
+	} else if (yLogScale) {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
@@ -111,7 +111,7 @@ vector<ofxGPoint> ofxGLayer::valueToPlot(const vector<ofxGPoint>& pts) const {
 void ofxGLayer::updatePlotPoints() {
 	plotPoints.clear();
 
-	if (xLog && yLog) {
+	if (xLogScale && yLogScale) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
@@ -120,7 +120,7 @@ void ofxGLayer::updatePlotPoints() {
 			float yPlot = log10(p.getY() / yLim[0]) * yScalingFactor;
 			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
-	} else if (xLog) {
+	} else if (xLogScale) {
 		float xScalingFactor = dim[0] / log10(xLim[1] / xLim[0]);
 		float yScalingFactor = -dim[1] / (yLim[1] - yLim[0]);
 
@@ -129,7 +129,7 @@ void ofxGLayer::updatePlotPoints() {
 			float yPlot = (p.getY() - yLim[0]) * yScalingFactor;
 			plotPoints.emplace_back(xPlot, yPlot, p.getLabel());
 		}
-	} else if (yLog) {
+	} else if (yLogScale) {
 		float xScalingFactor = dim[0] / (xLim[1] - xLim[0]);
 		float yScalingFactor = -dim[1] / log10(yLim[1] / yLim[0]);
 
@@ -151,7 +151,7 @@ void ofxGLayer::updatePlotPoints() {
 }
 
 float ofxGLayer::xPlotToValue(float xPlot) const {
-	if (xLog) {
+	if (xLogScale) {
 		return pow(10, log10(xLim[0]) + log10(xLim[1] / xLim[0]) * xPlot / dim[0]);
 	} else {
 		return xLim[0] + (xLim[1] - xLim[0]) * xPlot / dim[0];
@@ -159,7 +159,7 @@ float ofxGLayer::xPlotToValue(float xPlot) const {
 }
 
 float ofxGLayer::yPlotToValue(float yPlot) const {
-	if (yLog) {
+	if (yLogScale) {
 		return pow(10, log10(yLim[0]) - log10(yLim[1] / yLim[0]) * yPlot / dim[1]);
 	} else {
 		return yLim[0] - (yLim[1] - yLim[0]) * yPlot / dim[1];
@@ -614,15 +614,15 @@ void ofxGLayer::drawLine(const ofxGPoint& point1, const ofxGPoint& point2) {
 }
 
 void ofxGLayer::drawLine(float slope, float yCut, const ofColor& lc, float lw) {
-	if (xLog && yLog) {
+	if (xLogScale && yLogScale) {
 		ofxGPoint point1 = ofxGPoint(xLim[0], pow(10, slope * log10(xLim[0]) + yCut));
 		ofxGPoint point2 = ofxGPoint(xLim[1], pow(10, slope * log10(xLim[1]) + yCut));
 		drawLine(point1, point2, lc, lw);
-	} else if (xLog) {
+	} else if (xLogScale) {
 		ofxGPoint point1 = ofxGPoint(xLim[0], slope * log10(xLim[0]) + yCut);
 		ofxGPoint point2 = ofxGPoint(xLim[1], slope * log10(xLim[1]) + yCut);
 		drawLine(point1, point2, lc, lw);
-	} else if (yLog) {
+	} else if (yLogScale) {
 		ofxGPoint point1 = ofxGPoint(xLim[0], pow(10, slope * xLim[0] + yCut));
 		ofxGPoint point2 = ofxGPoint(xLim[1], pow(10, slope * xLim[1] + yCut));
 		drawLine(point1, point2, lc, lw);
@@ -813,7 +813,7 @@ vector<ofxGPoint> ofxGLayer::getHorizontalShape(float referenceValue) {
 		}
 
 		// Add the reference connections
-		if (yLog && referenceValue <= 0) {
+		if (yLogScale && referenceValue <= 0) {
 			referenceValue = min(yLim[0], yLim[1]);
 		}
 
@@ -953,7 +953,7 @@ vector<ofxGPoint> ofxGLayer::getVerticalShape(float referenceValue) {
 		}
 
 		// Add the reference connections
-		if (xLog && referenceValue <= 0) {
+		if (xLogScale && referenceValue <= 0) {
 			referenceValue = min(xLim[0], xLim[1]);
 		}
 
@@ -1150,12 +1150,12 @@ void ofxGLayer::setDim(const array<float, 2>& newDim) {
 }
 
 void ofxGLayer::setXLim(float xMin, float xMax) {
-// Check that the new limit makes sense
+	// Check that the new limit makes sense
 	if (xMin == xMax) {
 		throw invalid_argument("The limit range cannot be zero.");
 	} else if (!isfinite(xMin) || !isfinite(xMax)) {
 		throw invalid_argument("The limits need to be finite numbers.");
-	} else if (xLog && (xMin <= 0 || xMax <= 0)) {
+	} else if (xLogScale && (xMin <= 0 || xMax <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -1173,12 +1173,12 @@ void ofxGLayer::setXLim(const array<float, 2>& newXLim) {
 }
 
 void ofxGLayer::setYLim(float yMin, float yMax) {
-// Check that the new limit makes sense
+	// Check that the new limit makes sense
 	if (yMin == yMax) {
 		throw invalid_argument("The limit range cannot be zero.");
 	} else if (!isfinite(yMin) || !isfinite(yMax)) {
 		throw invalid_argument("The limits need to be finite numbers.");
-	} else if (yLog && (yMin <= 0 || yMax <= 0)) {
+	} else if (yLogScale && (yMin <= 0 || yMax <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -1196,12 +1196,12 @@ void ofxGLayer::setYLim(const array<float, 2>& newYLim) {
 }
 
 void ofxGLayer::setXYLim(float xMin, float xMax, float yMin, float yMax) {
-// Check that the new limit makes sense
+	// Check that the new limit makes sense
 	if (xMin == xMax || yMin == yMax) {
 		throw invalid_argument("The limit range cannot be zero.");
 	} else if (!isfinite(xMin) || !isfinite(xMax) || !isfinite(yMin) || !isfinite(yMax)) {
 		throw invalid_argument("The limits need to be finite numbers.");
-	} else if ((xLog && (xMin <= 0 || xMax <= 0)) || (yLog && (yMin <= 0 || yMax <= 0))) {
+	} else if ((xLogScale && (xMin <= 0 || xMax <= 0)) || (yLogScale && (yMin <= 0 || yMax <= 0))) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -1220,18 +1220,19 @@ void ofxGLayer::setXYLim(const array<float, 2>& newXLim, const array<float, 2>& 
 	setXYLim(newXLim[0], newXLim[1], newYLim[0], newYLim[1]);
 }
 
-void ofxGLayer::setLimAndLog(float xMin, float xMax, float yMin, float yMax, bool newXLog, bool newYLog) {
-// Check that the new limit makes sense
+void ofxGLayer::setLimAndLogScale(float xMin, float xMax, float yMin, float yMax, bool newXLogScale,
+		bool newYLogScale) {
+	// Check that the new limit makes sense
 	if (xMin == xMax || yMin == yMax) {
 		throw invalid_argument("The limit range cannot be zero.");
 	} else if (!isfinite(xMin) || !isfinite(xMax) || !isfinite(yMin) || !isfinite(yMax)) {
 		throw invalid_argument("The limits need to be finite numbers.");
-	} else if ((newXLog && (xMin <= 0 || xMax <= 0)) || (newYLog && (yMin <= 0 || yMax <= 0))) {
+	} else if ((newXLogScale && (xMin <= 0 || xMax <= 0)) || (newYLogScale && (yMin <= 0 || yMax <= 0))) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
-	xLog = newXLog;
-	yLog = newYLog;
+	xLogScale = newXLogScale;
+	yLogScale = newYLogScale;
 	xLim = {xMin, xMax};
 	yLim = {yMin, yMax};
 
@@ -1243,18 +1244,18 @@ void ofxGLayer::setLimAndLog(float xMin, float xMax, float yMin, float yMax, boo
 	}
 }
 
-void ofxGLayer::setLimAndLog(const array<float, 2>& newXLim, const array<float, 2>& newYLim, bool newXLog,
-		bool newYLog) {
-	setLimAndLog(newXLim[0], newXLim[1], newYLim[0], newYLim[1], newXLog, newYLog);
+void ofxGLayer::setLimAndLogScale(const array<float, 2>& newXLim, const array<float, 2>& newYLim, bool newXLogScale,
+		bool newYLogScale) {
+	setLimAndLogScale(newXLim[0], newXLim[1], newYLim[0], newYLim[1], newXLogScale, newYLogScale);
 }
 
-void ofxGLayer::setXLog(bool newXLog) {
-	if (newXLog != xLog) {
-		if (newXLog && (xLim[0] <= 0 || xLim[1] <= 0)) {
+void ofxGLayer::setXLogScale(bool newXLogScale) {
+	if (newXLogScale != xLogScale) {
+		if (newXLogScale && (xLim[0] <= 0 || xLim[1] <= 0)) {
 			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		}
 
-		xLog = newXLog;
+		xLogScale = newXLogScale;
 		updatePlotPoints();
 		updateInsideList();
 
@@ -1264,13 +1265,13 @@ void ofxGLayer::setXLog(bool newXLog) {
 	}
 }
 
-void ofxGLayer::setYLog(bool newYLog) {
-	if (newYLog != yLog) {
-		if (newYLog && (yLim[0] <= 0 || yLim[1] <= 0)) {
+void ofxGLayer::setYLogScale(bool newYLogScale) {
+	if (newYLogScale != yLogScale) {
+		if (newYLogScale && (yLim[0] <= 0 || yLim[1] <= 0)) {
 			throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 		}
 
-		yLog = newYLog;
+		yLogScale = newYLogScale;
 		updatePlotPoints();
 		updateInsideList();
 
@@ -1514,12 +1515,12 @@ array<float, 2> ofxGLayer::getYLim() const {
 	return yLim;
 }
 
-bool ofxGLayer::getXLog() const {
-	return xLog;
+bool ofxGLayer::getXLogScale() const {
+	return xLogScale;
 }
 
-bool ofxGLayer::getYLog() const {
-	return yLog;
+bool ofxGLayer::getYLogScale() const {
+	return yLogScale;
 }
 
 vector<ofxGPoint> ofxGLayer::getPoints() const {

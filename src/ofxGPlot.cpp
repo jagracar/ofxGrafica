@@ -15,8 +15,8 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	yLim = {0, 1};
 	fixedXLim = false;
 	fixedYLim = false;
-	xLog = false;
-	yLog = false;
+	xLogScale = false;
+	yLogScale = false;
 	invertedXScale = false;
 	invertedYScale = false;
 	includeAllLayersInLim = true;
@@ -31,13 +31,13 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	gridLineWidth = 1;
 
 	// Layers
-	mainLayer = ofxGLayer("main layer", dim, xLim, yLim, xLog, yLog);
+	mainLayer = ofxGLayer("main layer", dim, xLim, yLim, xLogScale, yLogScale);
 
 	// Axes and title
-	xAxis = ofxGAxis(GRAFICA_X_AXIS, dim, xLim, xLog);
-	topAxis = ofxGAxis(GRAFICA_TOP_AXIS, dim, xLim, xLog);
-	yAxis = ofxGAxis(GRAFICA_Y_AXIS, dim, yLim, yLog);
-	rightAxis = ofxGAxis(GRAFICA_RIGHT_AXIS, dim, yLim, yLog);
+	xAxis = ofxGAxis(GRAFICA_X_AXIS, dim, xLim, xLogScale);
+	topAxis = ofxGAxis(GRAFICA_TOP_AXIS, dim, xLim, xLogScale);
+	yAxis = ofxGAxis(GRAFICA_Y_AXIS, dim, yLim, yLogScale);
+	rightAxis = ofxGAxis(GRAFICA_RIGHT_AXIS, dim, yLim, yLogScale);
 	title = ofxGTitle(dim);
 
 	// Mouse events
@@ -94,7 +94,7 @@ void ofxGPlot::addLayer(const ofxGLayer& newLayer) {
 	if (!sameId) {
 		layerList.push_back(newLayer);
 		layerList.back().setDim(dim);
-		layerList.back().setLimAndLog(xLim, yLim, xLog, yLog);
+		layerList.back().setLimAndLogScale(xLim, yLim, xLogScale, yLogScale);
 
 		// Calculate and update the new plot limits if necessary
 		if (includeAllLayersInLim) {
@@ -122,7 +122,7 @@ void ofxGPlot::addLayer(const string& id, const vector<ofxGPoint>& points) {
 
 	// Add the layer to the list
 	if (!sameId) {
-		layerList.emplace_back(id, dim, xLim, yLim, xLog, yLog);
+		layerList.emplace_back(id, dim, xLim, yLim, xLogScale, yLogScale);
 		layerList.back().setPoints(points);
 
 		// Calculate and update the new plot limits if necessary
@@ -290,7 +290,7 @@ array<float, 2> ofxGPlot::calculatePlotXLim() {
 		// Expand the axis limits a bit
 		float delta = (lim[0] == 0) ? 0.1 : 0.1 * lim[0];
 
-		if (xLog) {
+		if (xLogScale) {
 			if (lim[0] != lim[1]) {
 				delta = pow(10, expandLimFactor * log10(lim[1] / lim[0]));
 			}
@@ -306,7 +306,7 @@ array<float, 2> ofxGPlot::calculatePlotXLim() {
 			lim[1] = lim[1] + delta;
 		}
 	} else {
-		if (xLog && (xLim[0] <= 0 || xLim[1] <= 0)) {
+		if (xLogScale && (xLim[0] <= 0 || xLim[1] <= 0)) {
 			lim = {0.1, 10};
 		} else {
 			lim = xLim;
@@ -345,7 +345,7 @@ array<float, 2> ofxGPlot::calculatePlotYLim() {
 		// Expand the axis limits a bit
 		float delta = (lim[0] == 0) ? 0.1 : 0.1 * lim[0];
 
-		if (yLog) {
+		if (yLogScale) {
 			if (lim[0] != lim[1]) {
 				delta = pow(10, expandLimFactor * log10(lim[1] / lim[0]));
 			}
@@ -361,7 +361,7 @@ array<float, 2> ofxGPlot::calculatePlotYLim() {
 			lim[1] = lim[1] + delta;
 		}
 	} else {
-		if (yLog && (yLim[0] <= 0 || yLim[1] <= 0)) {
+		if (yLogScale && (yLim[0] <= 0 || yLim[1] <= 0)) {
 			lim = {0.1, 10};
 		} else {
 			lim = yLim;
@@ -393,7 +393,7 @@ array<float, 2> ofxGPlot::calculatePointsXLim(const vector<ofxGPoint>& points) {
 						|| ((yLim[1] < yLim[0]) && (y <= yLim[0]) && (y >= yLim[1]));
 			}
 
-			if (isInside && !(xLog && x <= 0)) {
+			if (isInside && !(xLogScale && x <= 0)) {
 				if (x < lim[0]) {
 					lim[0] = x;
 				}
@@ -430,7 +430,7 @@ array<float, 2> ofxGPlot::calculatePointsYLim(const vector<ofxGPoint>& points) {
 						|| ((xLim[1] < xLim[0]) && (x <= xLim[0]) && (x >= xLim[1]));
 			}
 
-			if (isInside && !(yLog && y <= 0)) {
+			if (isInside && !(yLogScale && y <= 0)) {
 				if (y < lim[0]) {
 					lim[0] = y;
 				}
@@ -452,7 +452,7 @@ array<float, 2> ofxGPlot::calculatePointsYLim(const vector<ofxGPoint>& points) {
 
 void ofxGPlot::moveHorizontalAxesLim(float delta) {
 	// Obtain the new x limits
-	if (xLog) {
+	if (xLogScale) {
 		float deltaLim = pow(10, log10(xLim[1] / xLim[0]) * delta / dim[0]);
 		xLim[0] *= deltaLim;
 		xLim[1] *= deltaLim;
@@ -476,7 +476,7 @@ void ofxGPlot::moveHorizontalAxesLim(float delta) {
 
 void ofxGPlot::moveVerticalAxesLim(float delta) {
 	// Obtain the new y limits
-	if (yLog) {
+	if (yLogScale) {
 		float deltaLim = pow(10, log10(yLim[1] / yLim[0]) * delta / dim[1]);
 		yLim[0] *= deltaLim;
 		yLim[1] *= deltaLim;
@@ -500,7 +500,7 @@ void ofxGPlot::moveVerticalAxesLim(float delta) {
 
 void ofxGPlot::centerAndZoom(float factor, float xValue, float yValue) {
 	// Calculate the new limits
-	if (xLog) {
+	if (xLogScale) {
 		float deltaLim = pow(10, log10(xLim[1] / xLim[0]) / (2 * factor));
 		xLim = {xValue / deltaLim, xValue * deltaLim};
 	} else {
@@ -508,7 +508,7 @@ void ofxGPlot::centerAndZoom(float factor, float xValue, float yValue) {
 		xLim = {xValue - deltaLim, xValue + deltaLim};
 	}
 
-	if (yLog) {
+	if (yLogScale) {
 		float deltaLim = pow(10, log10(yLim[1] / yLim[0]) / (2 * factor));
 		yLim = {yValue / deltaLim, yValue * deltaLim};
 	} else {
@@ -540,7 +540,7 @@ void ofxGPlot::zoom(float factor, float xScreen, float yScreen) {
 	array<float, 2> plotPos = getPlotPosAt(xScreen, yScreen);
 	array<float, 2> value = mainLayer.plotToValue(plotPos[0], plotPos[1]);
 
-	if (xLog) {
+	if (xLogScale) {
 		float deltaLim = pow(10, log10(xLim[1] / xLim[0]) / (2 * factor));
 		float offset = pow(10, (log10(xLim[1] / xLim[0]) / factor) * (0.5 - plotPos[0] / dim[0]));
 		xLim = {value[0] * offset / deltaLim, value[0] * offset * deltaLim};
@@ -550,7 +550,7 @@ void ofxGPlot::zoom(float factor, float xScreen, float yScreen) {
 		xLim = {value[0] + offset - deltaLim, value[0] + offset + deltaLim};
 	}
 
-	if (yLog) {
+	if (yLogScale) {
 		float deltaLim = pow(10, log10(yLim[1] / yLim[0]) / (2 * factor));
 		float offset = pow(10, (log10(yLim[1] / yLim[0]) / factor) * (0.5 + plotPos[1] / dim[1]));
 		yLim = {value[1] * offset / deltaLim, value[1] * offset * deltaLim};
@@ -579,7 +579,7 @@ void ofxGPlot::shiftPlotPos(const array<float, 2>& valuePlotPos, const array<flo
 	float deltaXPlot = valuePlotPos[0] - newPlotPos[0];
 	float deltaYPlot = valuePlotPos[1] - newPlotPos[1];
 
-	if (xLog) {
+	if (xLogScale) {
 		float deltaLim = pow(10, log10(xLim[1] / xLim[0]) * deltaXPlot / dim[0]);
 		xLim = {xLim[0] * deltaLim, xLim[1] * deltaLim};
 	} else {
@@ -587,7 +587,7 @@ void ofxGPlot::shiftPlotPos(const array<float, 2>& valuePlotPos, const array<flo
 		xLim = {xLim[0] + deltaLim, xLim[1] + deltaLim};
 	}
 
-	if (yLog) {
+	if (yLogScale) {
 		float deltaLim = pow(10, -log10(yLim[1] / yLim[0]) * deltaYPlot / dim[1]);
 		yLim = {yLim[0] * deltaLim, yLim[1] * deltaLim};
 	} else {
@@ -972,7 +972,7 @@ void ofxGPlot::setXLim(float lowerLim, float upperLim) {
 	// Make sure the new limits makes sense
 	if (lowerLim == upperLim) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (xLog && (lowerLim <= 0 || upperLim <= 0)) {
+	} else if (xLogScale && (lowerLim <= 0 || upperLim <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -998,7 +998,7 @@ void ofxGPlot::setYLim(float lowerLim, float upperLim) {
 	// Make sure the new limits makes sense
 	if (lowerLim == upperLim) {
 		throw invalid_argument("The limit range cannot be zero.");
-	} else if (yLog && (lowerLim <= 0 || upperLim <= 0)) {
+	} else if (yLogScale && (lowerLim <= 0 || upperLim <= 0)) {
 		throw invalid_argument("The axis limits are negative and this is not allowed in logarithmic scale.");
 	}
 
@@ -1035,35 +1035,35 @@ void ofxGPlot::setFixedYLim(bool newFixedYLim) {
 }
 
 void ofxGPlot::setLogScale(const string& logType) {
-	bool newXLog = xLog;
-	bool newYLog = yLog;
+	bool newXLogScale = xLogScale;
+	bool newYLogScale = yLogScale;
 
 	if (logType == "xy" || logType == "yx") {
-		newXLog = true;
-		newYLog = true;
+		newXLogScale = true;
+		newYLogScale = true;
 	} else if (logType == "x") {
-		newXLog = true;
-		newYLog = false;
+		newXLogScale = true;
+		newYLogScale = false;
 	} else if (logType == "y") {
-		newXLog = false;
-		newYLog = true;
+		newXLogScale = false;
+		newYLogScale = true;
 	} else if (logType == "") {
-		newXLog = false;
-		newYLog = false;
+		newXLogScale = false;
+		newYLogScale = false;
 	}
 
 	// Do something only if the scale changed
-	if (newXLog != xLog || newYLog != yLog) {
+	if (newXLogScale != xLogScale || newYLogScale != yLogScale) {
 		// Set the new log scales
-		xLog = newXLog;
-		yLog = newYLog;
+		xLogScale = newXLogScale;
+		yLogScale = newYLogScale;
 
 		// Unfix the limits if the old ones don't make sense
-		if (xLog && fixedXLim && (xLim[0] <= 0 || xLim[1] <= 0)) {
+		if (xLogScale && fixedXLim && (xLim[0] <= 0 || xLim[1] <= 0)) {
 			fixedXLim = false;
 		}
 
-		if (yLog && fixedYLim && (yLim[0] <= 0 || yLim[1] <= 0)) {
+		if (yLogScale && fixedYLim && (yLim[0] <= 0 || yLim[1] <= 0)) {
 			fixedYLim = false;
 		}
 
@@ -1077,16 +1077,16 @@ void ofxGPlot::setLogScale(const string& logType) {
 		}
 
 		// Update the axes
-		xAxis.setLimAndLogScale(xLim, xLog);
-		topAxis.setLimAndLogScale(xLim, xLog);
-		yAxis.setLimAndLogScale(yLim, yLog);
-		rightAxis.setLimAndLogScale(yLim, yLog);
+		xAxis.setLimAndLogScale(xLim, xLogScale);
+		topAxis.setLimAndLogScale(xLim, xLogScale);
+		yAxis.setLimAndLogScale(yLim, yLogScale);
+		rightAxis.setLimAndLogScale(yLim, yLogScale);
 
 		// Update the layers
-		mainLayer.setLimAndLog(xLim, yLim, xLog, yLog);
+		mainLayer.setLimAndLogScale(xLim, yLim, xLogScale, yLogScale);
 
 		for (ofxGLayer& layer : layerList) {
-			layer.setLimAndLog(xLim, yLim, xLog, yLog);
+			layer.setLimAndLogScale(xLim, yLim, xLogScale, yLogScale);
 		}
 	}
 }
@@ -1467,12 +1467,12 @@ bool ofxGPlot::getFixedYLim() const {
 	return fixedYLim;
 }
 
-bool ofxGPlot::getXLog() const {
-	return xLog;
+bool ofxGPlot::getXLogScale() const {
+	return xLogScale;
 }
 
-bool ofxGPlot::getYLog() const {
-	return yLog;
+bool ofxGPlot::getYLogScale() const {
+	return yLogScale;
 }
 
 bool ofxGPlot::getInvertedXScale() {
