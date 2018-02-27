@@ -292,7 +292,7 @@ public:
 	/**
 	 * @brief Draws a filled contour connecting consecutive points in the layer and a reference value
 	 *
-	 * @param contourType the type of contours to use. It can be GPlot.VERTICAL or GPlot.HORIZONTAL
+	 * @param contourType the type of contours to use. It can be GRAFICA_HORIZONTAL_CONTOUR or GRAFICA_VERTICAL_CONTOUR
 	 * @param referenceValue the reference value to use to close the contour
 	 */
 	void drawFilledContour(ofxGContourType contourType, float referenceValue);
@@ -331,7 +331,7 @@ public:
 	 * @param text the annotation text
 	 * @param x x plot value
 	 * @param y y plot value
-	 * @param verAlign text vertical alignment. It can be GRAFICA_CENTER_ALIGN, GRAFICA_TOP_ALIGN, GRAFICA_BOTTOM_ALIGN
+	 * @param verAlign text vertical alignment. It can be GRAFICA_CENTER_ALIGN, GRAFICA_TOP_ALIGN or GRAFICA_BOTTOM_ALIGN
 	 */
 	void drawAnnotation(const string& text, float x, float y, ofxGTextAlignment verAlign) const;
 
@@ -344,7 +344,7 @@ public:
 	void setDim(float xDim, float yDim);
 
 	/**
-	 * @brief Sets the layer dimensions, which should be equal to the plot box dimensions
+	 * @brief Sets the layer dimensions
 	 *
 	 * @param newDim the new layer dimensions
 	 */
@@ -593,7 +593,7 @@ public:
 	/**
 	 * @brief Sets the histogram type
 	 *
-	 * @param histType the new histogram type. It can be GPlot.HORIZONTAL or GPlot.VERTICAL
+	 * @param histType the new histogram type. It can be GRAFICA_HORIZONTAL_HISTOGRAM or GRAFICA_VERTICAL_HISTOGRAM
 	 */
 	void setHistType(ofxGHistogramType histType);
 
@@ -839,7 +839,8 @@ protected:
 	int removePointFromCuts(array<array<float, 2>, 4>& cuts, int nCuts, const ofxGPoint& plotPoint, float tolerance);
 
 	/**
-	 * @brief Obtains the shape points of the horizontal contour that connects consecutive layer points and a reference value
+	 * @brief Obtains the shape points of the horizontal contour that connects consecutive layer points and a reference
+	 * value
 	 *
 	 * @param referenceValue the reference value to use to close the contour
 	 *
@@ -848,7 +849,8 @@ protected:
 	vector<ofxGPoint> getHorizontalShape(float referenceValue);
 
 	/**
-	 * @brief Obtains the shape points of the vertical contour that connects consecutive layer points and a reference value
+	 * @brief Obtains the shape points of the vertical contour that connects consecutive layer points and a reference
+	 * value
 	 *
 	 * @param referenceValue the reference value to use to close the contour
 	 *

@@ -468,6 +468,55 @@ void ofxGLayer::drawPoints() const {
 	}
 
 	ofPopStyle();
+
+	/*
+	 float res = 22;
+	 vector<ofVec3f> myCircle;
+	 for (int i = 0; i < res; ++i) {
+	 float angle = i * TWO_PI / res;
+	 myCircle.emplace_back(cos(angle), sin(angle), 0);
+	 }
+
+	 int nPoints = plotPoints.size();
+	 int nSizes = pointSizes.size();
+	 ofMesh mesh = ofMesh();
+
+	 for (int i = 0; i < nPoints; ++i) {
+	 if (inside[i]) {
+	 int counter = mesh.getNumVertices();
+	 float x = plotPoints[i].getX();
+	 float y = plotPoints[i].getY();
+	 float rad = pointSizes[i % nSizes];
+
+	 for (int i = 0; i < res; ++i) {
+	 mesh.addVertex(ofVec3f(rad * myCircle[i].x + x, rad * myCircle[i].y + y, 0));
+
+	 if (i == res - 1) {
+	 mesh.addIndex(i + counter);
+	 mesh.addIndex(counter);
+	 mesh.addIndex(res + counter);
+	 } else {
+	 mesh.addIndex(i + counter);
+	 mesh.addIndex(i + 1 + counter);
+	 mesh.addIndex(res + counter);
+	 }
+	 }
+
+	 mesh.addVertex(ofVec3f(x, y, 0));
+	 }
+	 }
+
+	 // Create the mesh
+	 //mesh.addVertices(vertices);
+	 //mesh.addIndices(indices);
+	 vector<ofFloatColor> colors(mesh.getNumVertices(), pointColors[0]);
+	 mesh.addColors(colors);
+
+	 // Draw the mesh
+	 //ofPushStyle();
+	 mesh.draw();
+	 //ofPopStyle();
+	 */
 }
 
 void ofxGLayer::drawPoints(ofPath& pointShape) const {
@@ -551,29 +600,40 @@ void ofxGLayer::drawPoint(const ofxGPoint& point, const ofImage& pointImg) const
 
 void ofxGLayer::drawLines() {
 	if (plotPoints.size() > 1) {
-		ofPushStyle();
-		ofSetColor(lineColor);
-		ofSetLineWidth(lineWidth);
+		// Save the mesh vertices
+		vector<ofVec3f> vertices;
 
 		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
 			if (inside[i] && inside[i + 1]) {
-				ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), plotPoints[i + 1].getX(),
-						plotPoints[i + 1].getY());
+				vertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
+				vertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
 			} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
 				// At least one of the points is outside the inner region.
 				// Obtain the valid line box intersections
 				int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
 
 				if (inside[i]) {
-					ofDrawLine(plotPoints[i].getX(), plotPoints[i].getY(), cuts[0][0], cuts[0][1]);
+					vertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
+					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
 				} else if (inside[i + 1]) {
-					ofDrawLine(cuts[0][0], cuts[0][1], plotPoints[i + 1].getX(), plotPoints[i + 1].getY());
+					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
+					vertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
 				} else if (nCuts >= 2) {
-					ofDrawLine(cuts[0][0], cuts[0][1], cuts[1][0], cuts[1][1]);
+					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
+					vertices.emplace_back(cuts[1][0], cuts[1][1], 0);
 				}
 			}
 		}
 
+		// Create the mesh
+		ofMesh mesh = ofMesh(OF_PRIMITIVE_LINES, vertices);
+		vector<ofFloatColor> colors(vertices.size(), lineColor);
+		mesh.addColors(colors);
+
+		// Draw the mesh
+		ofPushStyle();
+		ofSetLineWidth(lineWidth);
+		mesh.draw();
 		ofPopStyle();
 	}
 }
@@ -715,8 +775,7 @@ vector<ofxGPoint> ofxGLayer::getHorizontalShape(float referenceValue) {
 				shapePoints.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), "normal point");
 				addedPoints = true;
 			} else if (plotPoints[i].getX() >= 0 && plotPoints[i].getX() <= dim[0]) {
-				// If it's outside, add the projection of the point on the
-				// horizontal axes
+				// If it's outside, add the projection of the point on the horizontal axes
 				if (-plotPoints[i].getY() < 0) {
 					shapePoints.emplace_back(plotPoints[i].getX(), 0, "projection");
 					addedPoints = true;
@@ -855,8 +914,7 @@ vector<ofxGPoint> ofxGLayer::getVerticalShape(float referenceValue) {
 				shapePoints.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), "normal point");
 				addedPoints = true;
 			} else if (-plotPoints[i].getY() >= 0 && -plotPoints[i].getY() <= dim[1]) {
-				// If it's outside, add the projection of the point on the
-				// vertical axes
+				// If it's outside, add the projection of the point on the vertical axes
 				if (plotPoints[i].getX() < 0) {
 					shapePoints.emplace_back(0, plotPoints[i].getY(), "projection");
 					addedPoints = true;
