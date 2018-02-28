@@ -164,6 +164,15 @@ public:
 	/**
 	 * @brief Draws the points inside the layer limits
 	 *
+	 * This method is considerably faster than drawPoints()
+	 *
+	 * @param pointColor the point color
+	 */
+	void drawPoints(const ofColor& pointColor) const;
+
+	/**
+	 * @brief Draws the points inside the layer limits
+	 *
 	 * @param pointShape the shape that should be used to represent the points
 	 */
 	void drawPoints(ofPath& pointShape) const;

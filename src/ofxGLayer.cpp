@@ -468,55 +468,74 @@ void ofxGLayer::drawPoints() const {
 	}
 
 	ofPopStyle();
+}
 
-	/*
-	 float res = 22;
-	 vector<ofVec3f> myCircle;
-	 for (int i = 0; i < res; ++i) {
-	 float angle = i * TWO_PI / res;
-	 myCircle.emplace_back(cos(angle), sin(angle), 0);
-	 }
+void ofxGLayer::drawPoints(const ofColor& pointColor) const {
+	int nPoints = plotPoints.size();
+	int nSizes = pointSizes.size();
 
-	 int nPoints = plotPoints.size();
-	 int nSizes = pointSizes.size();
-	 ofMesh mesh = ofMesh();
+	// Create the circle vertices
+	vector<ofVec3f> circleVertices;
+	int circleResolution = ofGetCurrentRenderer()->getPath().getCircleResolution();
 
-	 for (int i = 0; i < nPoints; ++i) {
-	 if (inside[i]) {
-	 int counter = mesh.getNumVertices();
-	 float x = plotPoints[i].getX();
-	 float y = plotPoints[i].getY();
-	 float rad = pointSizes[i % nSizes];
+	for (int i = 0; i < circleResolution; ++i) {
+		float angle = i * TWO_PI / circleResolution;
+		circleVertices.emplace_back(cos(angle), sin(angle), 0);
+	}
 
-	 for (int i = 0; i < res; ++i) {
-	 mesh.addVertex(ofVec3f(rad * myCircle[i].x + x, rad * myCircle[i].y + y, 0));
+	// Get the number of points inside the plot
+	int nPointsInside = 0;
 
-	 if (i == res - 1) {
-	 mesh.addIndex(i + counter);
-	 mesh.addIndex(counter);
-	 mesh.addIndex(res + counter);
-	 } else {
-	 mesh.addIndex(i + counter);
-	 mesh.addIndex(i + 1 + counter);
-	 mesh.addIndex(res + counter);
-	 }
-	 }
+	for (int i = 0; i < nPoints; ++i) {
+		if (inside[i]) {
+			++nPointsInside;
+		}
+	}
 
-	 mesh.addVertex(ofVec3f(x, y, 0));
-	 }
-	 }
+	// Create the points mesh
+	ofMesh mesh = ofMesh();
+	mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+	mesh.getVertices().resize((1 + circleResolution) * nPointsInside);
+	mesh.getIndices().resize(3 * circleResolution * nPointsInside);
+	int verticesCounter = 0;
+	int indicesCounter = 0;
 
-	 // Create the mesh
-	 //mesh.addVertices(vertices);
-	 //mesh.addIndices(indices);
-	 vector<ofFloatColor> colors(mesh.getNumVertices(), pointColors[0]);
-	 mesh.addColors(colors);
+	for (int i = 0; i < nPoints; ++i) {
+		if (inside[i]) {
+			float x = plotPoints[i].getX();
+			float y = plotPoints[i].getY();
+			float radius = pointSizes[i % nSizes];
 
-	 // Draw the mesh
-	 //ofPushStyle();
-	 mesh.draw();
-	 //ofPopStyle();
-	 */
+			mesh.getVertices()[verticesCounter].set(x, y, 0);
+			int centerIndex = verticesCounter;
+			++verticesCounter;
+
+			for (int i = 0; i < circleResolution; ++i) {
+				mesh.getVertices()[verticesCounter].set(radius * circleVertices[i].x + x,
+						radius * circleVertices[i].y + y, 0);
+				++verticesCounter;
+
+				if (i != circleResolution - 1) {
+					mesh.getIndices()[indicesCounter] = centerIndex + i + 1;
+					mesh.getIndices()[indicesCounter + 1] = centerIndex + i + 2;
+					mesh.getIndices()[indicesCounter + 2] = centerIndex;
+					indicesCounter += 3;
+				} else {
+					mesh.getIndices()[indicesCounter] = centerIndex + i + 1;
+					mesh.getIndices()[indicesCounter + 1] = centerIndex + 1;
+					mesh.getIndices()[indicesCounter + 2] = centerIndex;
+					indicesCounter += 3;
+				}
+			}
+		}
+	}
+
+	// Draw the mesh
+	ofPushStyle();
+	ofFill();
+	ofSetColor(pointColor);
+	mesh.draw();
+	ofPopStyle();
 }
 
 void ofxGLayer::drawPoints(ofPath& pointShape) const {
@@ -627,11 +646,10 @@ void ofxGLayer::drawLines() {
 
 		// Create the mesh
 		ofMesh mesh = ofMesh(OF_PRIMITIVE_LINES, vertices);
-		vector<ofFloatColor> colors(vertices.size(), lineColor);
-		mesh.addColors(colors);
 
 		// Draw the mesh
 		ofPushStyle();
+		ofSetColor(lineColor);
 		ofSetLineWidth(lineWidth);
 		mesh.draw();
 		ofPopStyle();
@@ -1605,6 +1623,6 @@ float ofxGLayer::getLineWidth() const {
 	return lineWidth;
 }
 
-ofxGHistogram& ofxGLayer::getHistogram() {
+ofxGHistogram & ofxGLayer::getHistogram() {
 	return hist;
 }
