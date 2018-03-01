@@ -328,6 +328,13 @@ public:
 	/**
 	 * @brief Draws the points from all layers in the plot
 	 *
+	 * @param pointColor the point color
+	 */
+	void drawPoints(const ofColor& pointColor) const;
+
+	/**
+	 * @brief Draws the points from all layers in the plot
+	 *
 	 * @param pointShape the shape that should be used to represent the points
 	 */
 	void drawPoints(ofPath& pointShape) const;

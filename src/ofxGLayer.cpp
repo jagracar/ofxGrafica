@@ -471,8 +471,14 @@ void ofxGLayer::drawPoints() const {
 }
 
 void ofxGLayer::drawPoints(const ofColor& pointColor) const {
-	int nPoints = plotPoints.size();
-	int nSizes = pointSizes.size();
+	// Get the number of points inside the plot
+	int nPointsInside = 0;
+
+	for (bool isInside : inside) {
+		if (isInside) {
+			++nPointsInside;
+		}
+	}
 
 	// Create the circle vertices
 	vector<ofVec3f> circleVertices;
@@ -483,20 +489,14 @@ void ofxGLayer::drawPoints(const ofColor& pointColor) const {
 		circleVertices.emplace_back(cos(angle), sin(angle), 0);
 	}
 
-	// Get the number of points inside the plot
-	int nPointsInside = 0;
-
-	for (int i = 0; i < nPoints; ++i) {
-		if (inside[i]) {
-			++nPointsInside;
-		}
-	}
-
 	// Create the points mesh
 	ofMesh mesh = ofMesh();
-	mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-	mesh.getVertices().resize((1 + circleResolution) * nPointsInside);
-	mesh.getIndices().resize(3 * circleResolution * nPointsInside);
+	vector<ofVec3f>& meshVertices = mesh.getVertices();
+	vector<ofIndexType>& meshIndices = mesh.getIndices();
+	meshVertices.resize((1 + circleResolution) * nPointsInside);
+	meshIndices.resize(3 * circleResolution * nPointsInside);
+	int nPoints = plotPoints.size();
+	int nSizes = pointSizes.size();
 	int verticesCounter = 0;
 	int indicesCounter = 0;
 
@@ -506,24 +506,24 @@ void ofxGLayer::drawPoints(const ofColor& pointColor) const {
 			float y = plotPoints[i].getY();
 			float radius = pointSizes[i % nSizes];
 
-			mesh.getVertices()[verticesCounter].set(x, y, 0);
+			meshVertices[verticesCounter].set(x, y, 0);
 			int centerIndex = verticesCounter;
 			++verticesCounter;
 
-			for (int i = 0; i < circleResolution; ++i) {
-				mesh.getVertices()[verticesCounter].set(radius * circleVertices[i].x + x,
-						radius * circleVertices[i].y + y, 0);
+			for (int j = 0; j < circleResolution; ++j) {
+				meshVertices[verticesCounter].set(radius * circleVertices[j].x + x, radius * circleVertices[j].y + y,
+						0);
 				++verticesCounter;
 
-				if (i != circleResolution - 1) {
-					mesh.getIndices()[indicesCounter] = centerIndex + i + 1;
-					mesh.getIndices()[indicesCounter + 1] = centerIndex + i + 2;
-					mesh.getIndices()[indicesCounter + 2] = centerIndex;
+				if (j != circleResolution - 1) {
+					meshIndices[indicesCounter] = centerIndex + j + 1;
+					meshIndices[indicesCounter + 1] = centerIndex + j + 2;
+					meshIndices[indicesCounter + 2] = centerIndex;
 					indicesCounter += 3;
 				} else {
-					mesh.getIndices()[indicesCounter] = centerIndex + i + 1;
-					mesh.getIndices()[indicesCounter + 1] = centerIndex + 1;
-					mesh.getIndices()[indicesCounter + 2] = centerIndex;
+					meshIndices[indicesCounter] = centerIndex + j + 1;
+					meshIndices[indicesCounter + 1] = centerIndex + 1;
+					meshIndices[indicesCounter + 2] = centerIndex;
 					indicesCounter += 3;
 				}
 			}
@@ -619,33 +619,32 @@ void ofxGLayer::drawPoint(const ofxGPoint& point, const ofImage& pointImg) const
 
 void ofxGLayer::drawLines() {
 	if (plotPoints.size() > 1) {
-		// Save the mesh vertices
-		vector<ofVec3f> vertices;
+		// Create the lines mesh
+		ofMesh mesh = ofMesh();
+		mesh.setMode(OF_PRIMITIVE_LINES);
+		vector<ofVec3f>& meshVertices = mesh.getVertices();
 
 		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
 			if (inside[i] && inside[i + 1]) {
-				vertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
-				vertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
+				meshVertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
+				meshVertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
 			} else if (plotPoints[i].isValid() && plotPoints[i + 1].isValid()) {
 				// At least one of the points is outside the inner region.
 				// Obtain the valid line box intersections
 				int nCuts = obtainBoxIntersections(plotPoints[i], plotPoints[i + 1]);
 
 				if (inside[i]) {
-					vertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
-					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
+					meshVertices.emplace_back(plotPoints[i].getX(), plotPoints[i].getY(), 0);
+					meshVertices.emplace_back(cuts[0][0], cuts[0][1], 0);
 				} else if (inside[i + 1]) {
-					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
-					vertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
+					meshVertices.emplace_back(cuts[0][0], cuts[0][1], 0);
+					meshVertices.emplace_back(plotPoints[i + 1].getX(), plotPoints[i + 1].getY(), 0);
 				} else if (nCuts >= 2) {
-					vertices.emplace_back(cuts[0][0], cuts[0][1], 0);
-					vertices.emplace_back(cuts[1][0], cuts[1][1], 0);
+					meshVertices.emplace_back(cuts[0][0], cuts[0][1], 0);
+					meshVertices.emplace_back(cuts[1][0], cuts[1][1], 0);
 				}
 			}
 		}
-
-		// Create the mesh
-		ofMesh mesh = ofMesh(OF_PRIMITIVE_LINES, vertices);
 
 		// Draw the mesh
 		ofPushStyle();
@@ -1623,6 +1622,6 @@ float ofxGLayer::getLineWidth() const {
 	return lineWidth;
 }
 
-ofxGHistogram & ofxGLayer::getHistogram() {
+ofxGHistogram& ofxGLayer::getHistogram() {
 	return hist;
 }

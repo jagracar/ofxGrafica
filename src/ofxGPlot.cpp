@@ -716,6 +716,14 @@ void ofxGPlot::drawPoints() const {
 	}
 }
 
+void ofxGPlot::drawPoints(const ofColor& pointColor) const {
+	mainLayer.drawPoints(pointColor);
+
+	for (const ofxGLayer& layer : layerList) {
+		layer.drawPoints(pointColor);
+	}
+}
+
 void ofxGPlot::drawPoints(ofPath& pointShape) const {
 	mainLayer.drawPoints(pointShape);
 
