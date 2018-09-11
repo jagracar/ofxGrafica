@@ -32,7 +32,7 @@ public:
 	 * @param v the 2d vector containing the point coordinates
 	 * @param _label the text label
 	 */
-	ofxGPoint(const ofVec2f& v, const string& _label = "");
+	ofxGPoint(const glm::vec2& v, const string& _label = "");
 
 	/**
 	 * @brief Sets the point x and y coordinates and the label
@@ -49,7 +49,7 @@ public:
 	 * @param v the 2d vector with the new point coordinates
 	 * @param newLabel the new point text label
 	 */
-	void set(const ofVec2f& v, const string& newLabel);
+	void set(const glm::vec2& v, const string& newLabel);
 
 	/**
 	 * @brief Sets the point x and y coordinates and the label
@@ -85,7 +85,7 @@ public:
 	 *
 	 * @param v the 2d vector with the new point coordinates
 	 */
-	void setXY(const ofVec2f& v);
+	void setXY(const glm::vec2& v);
 
 	/**
 	 * @brief Sets the point x and y coordinates

@@ -148,7 +148,7 @@ void ofxGHistogram::drawHistLabels() const {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					ofPushMatrix();
 					ofTranslate(p.getX() + fontSize / 2.0, labelsOffset + bounds.width);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(p.getLabel(), 0, 0);
 					ofPopMatrix();
 				}
@@ -168,7 +168,7 @@ void ofxGHistogram::drawHistLabels() const {
 					ofRectangle bounds = font.getStringBoundingBox(p.getLabel(), 0, 0);
 					ofPushMatrix();
 					ofTranslate(-labelsOffset, p.getY() + bounds.width / 2);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(p.getLabel(), 0, 0);
 					ofPopMatrix();
 				}

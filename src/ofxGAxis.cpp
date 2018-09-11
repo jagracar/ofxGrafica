@@ -327,7 +327,7 @@ void ofxGAxis::drawAsXAxis() const {
 
 					ofPushMatrix();
 					ofTranslate(plotTicks[i] + fontSize / 2.0, offset + tickLabelOffset + bounds.width);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -375,7 +375,7 @@ void ofxGAxis::drawAsYAxis() const {
 
 					ofPushMatrix();
 					ofTranslate(-offset - tickLabelOffset, plotTicks[i] + bounds.width / 2);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -424,7 +424,7 @@ void ofxGAxis::drawAsTopAxis() const {
 				if (ticksInside[i] && tickLabels[i] != "") {
 					ofPushMatrix();
 					ofTranslate(plotTicks[i] + fontSize / 2.0, -offset - tickLabelOffset);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}
@@ -475,7 +475,7 @@ void ofxGAxis::drawAsRightAxis() const {
 
 					ofPushMatrix();
 					ofTranslate(offset + tickLabelOffset + fontSize, plotTicks[i] + bounds.width / 2);
-					ofRotateZ(-90);
+					ofRotateZDeg(-90);
 					font.drawString(tickLabels[i], 0, 0);
 					ofPopMatrix();
 				}

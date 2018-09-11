@@ -481,7 +481,7 @@ void ofxGLayer::drawPoints(const ofColor& pointColor) const {
 	}
 
 	// Create the circle vertices
-	vector<ofVec3f> circleVertices;
+	vector<glm::vec3> circleVertices;
 	int circleResolution = ofGetCurrentRenderer()->getPath().getCircleResolution();
 
 	for (int i = 0; i < circleResolution; ++i) {
@@ -491,7 +491,7 @@ void ofxGLayer::drawPoints(const ofColor& pointColor) const {
 
 	// Create the points mesh
 	ofMesh mesh = ofMesh();
-	vector<ofVec3f>& meshVertices = mesh.getVertices();
+	vector<glm::vec3>& meshVertices = mesh.getVertices();
 	vector<ofIndexType>& meshIndices = mesh.getIndices();
 	meshVertices.resize((1 + circleResolution) * nPointsInside);
 	meshIndices.resize(3 * circleResolution * nPointsInside);
@@ -506,13 +506,13 @@ void ofxGLayer::drawPoints(const ofColor& pointColor) const {
 			float y = plotPoints[i].getY();
 			float radius = pointSizes[i % nSizes];
 
-			meshVertices[verticesCounter].set(x, y, 0);
+			meshVertices[verticesCounter] = glm::vec3(x, y, 0);
 			int centerIndex = verticesCounter;
 			++verticesCounter;
 
 			for (int j = 0; j < circleResolution; ++j) {
-				meshVertices[verticesCounter].set(radius * circleVertices[j].x + x, radius * circleVertices[j].y + y,
-						0);
+				meshVertices[verticesCounter] = glm::vec3(radius * circleVertices[j].x + x,
+						radius * circleVertices[j].y + y, 0);
 				++verticesCounter;
 
 				if (j != circleResolution - 1) {
@@ -622,7 +622,7 @@ void ofxGLayer::drawLines() {
 		// Create the lines mesh
 		ofMesh mesh = ofMesh();
 		mesh.setMode(OF_PRIMITIVE_LINES);
-		vector<ofVec3f>& meshVertices = mesh.getVertices();
+		vector<glm::vec3>& meshVertices = mesh.getVertices();
 
 		for (vector<ofxGPoint>::size_type i = 0; i < plotPoints.size() - 1; ++i) {
 			if (inside[i] && inside[i + 1]) {

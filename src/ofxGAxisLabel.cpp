@@ -44,7 +44,7 @@ void ofxGAxisLabel::drawAsXLabel() const {
 	if (rotate) {
 		ofPushMatrix();
 		ofTranslate(plotPos + fontSize / 2.0, offset + bounds.width);
-		ofRotateZ(-90);
+		ofRotateZDeg(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
@@ -90,7 +90,7 @@ void ofxGAxisLabel::drawAsYLabel() const {
 			break;
 		}
 
-		ofRotateZ(-90);
+		ofRotateZDeg(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
@@ -108,7 +108,7 @@ void ofxGAxisLabel::drawAsTopLabel() const {
 	if (rotate) {
 		ofPushMatrix();
 		ofTranslate(plotPos + fontSize / 2.0, -offset - dim[1]);
-		ofRotateZ(-90);
+		ofRotateZDeg(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {
@@ -154,7 +154,7 @@ void ofxGAxisLabel::drawAsRightLabel() const {
 			break;
 		}
 
-		ofRotateZ(-90);
+		ofRotateZDeg(-90);
 		font.drawString(text, 0, 0);
 		ofPopMatrix();
 	} else {

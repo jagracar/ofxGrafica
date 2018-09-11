@@ -9,7 +9,7 @@ ofxGPoint::ofxGPoint() :
 		ofxGPoint(0.0, 0.0) {
 }
 
-ofxGPoint::ofxGPoint(const ofVec2f& v, const string& _label) :
+ofxGPoint::ofxGPoint(const glm::vec2& v, const string& _label) :
 		ofxGPoint(v.x, v.y, _label) {
 }
 
@@ -20,7 +20,7 @@ void ofxGPoint::set(float newX, float newY, const string& newLabel) {
 	valid = isfinite(x) && isfinite(y);
 }
 
-void ofxGPoint::set(const ofVec2f& v, const string& newLabel) {
+void ofxGPoint::set(const glm::vec2& v, const string& newLabel) {
 	set(v.x, v.y, newLabel);
 }
 
@@ -44,7 +44,7 @@ void ofxGPoint::setXY(float newX, float newY) {
 	valid = isfinite(x) && isfinite(y);
 }
 
-void ofxGPoint::setXY(const ofVec2f& v) {
+void ofxGPoint::setXY(const glm::vec2& v) {
 	setXY(v.x, v.y);
 }
 

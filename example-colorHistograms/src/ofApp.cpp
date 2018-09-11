@@ -7,7 +7,7 @@ void ofApp::setup() {
 
 	// Load the image and set the image position
 	img.load("picture.jpg");
-	imgPos = ofPoint(410, 100);
+	imgPos = glm::vec2(410, 100);
 
 	// Set the rectangle position and size
 	rect.set(imgPos, 20, 20);
