@@ -206,7 +206,7 @@ vector<ofxGPoint>::size_type ofxGLayer::getPointIndexAtPlotPos(float xPlot, floa
 			if (inside[i]) {
 				float distSq = pow(plotPoints[i].getX() - xPlot, 2) + pow(plotPoints[i].getY() - yPlot, 2);
 
-				if (distSq < max(pow(pointSizes[i % pointSizes.size()], 2), 25.0)) {
+				if (distSq < max(static_cast<float>(pow(pointSizes[i % pointSizes.size()], 2)), 25.0f)) {
 					if (distSq < minDistSq) {
 						minDistSq = distSq;
 						pointIndex = i;
