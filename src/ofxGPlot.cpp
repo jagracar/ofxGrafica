@@ -74,6 +74,16 @@ ofxGPlot::ofxGPlot(float xPos, float yPos, float plotWidth, float plotHeight) :
 	ofAddListener(ofEvents().keyReleased, this, &ofxGPlot::keyEventHandler, OF_EVENT_ORDER_AFTER_APP);
 }
 
+ofxGPlot::~ofxGPlot() {
+    // Remove the event listeners
+    ofRemoveListener(ofEvents().mousePressed, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+    ofRemoveListener(ofEvents().mouseReleased, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+    ofRemoveListener(ofEvents().mouseDragged, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+    ofRemoveListener(ofEvents().mouseScrolled, this, &ofxGPlot::mouseEventHandler, OF_EVENT_ORDER_AFTER_APP);
+    ofRemoveListener(ofEvents().keyPressed, this, &ofxGPlot::keyEventHandler, OF_EVENT_ORDER_AFTER_APP);
+    ofRemoveListener(ofEvents().keyReleased, this, &ofxGPlot::keyEventHandler, OF_EVENT_ORDER_AFTER_APP);
+}
+
 void ofxGPlot::addLayer(const ofxGLayer& newLayer) {
 	// Check that it is the only layer with that id
 	string id = newLayer.getId();

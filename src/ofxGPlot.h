@@ -27,6 +27,11 @@ public:
 	 */
 	ofxGPlot(float xPos = 0, float yPos = 0, float plotWidth = 450, float plotHeight = 300);
 
+    /**
+     * @brief Destructor
+     */
+	~ofxGPlot();
+
 	/**
 	 * @brief Adds a layer to the plot
 	 *
